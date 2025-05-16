@@ -1,8 +1,7 @@
 
 import { ComponentDefinition } from "@/types/appBuilder";
 import { Card } from "@/components/ui/card";
-import * as LucideIcons from "lucide-react";
-import { LucideIcon } from "lucide-react";
+import { getLucideIcon } from "@/utils/iconUtils";
 
 interface ComponentLibraryItemProps {
   component: ComponentDefinition;
@@ -13,9 +12,7 @@ export default function ComponentLibraryItem({
   component, 
   onDragStart 
 }: ComponentLibraryItemProps) {
-  const IconComponent = (LucideIcons as Record<string, LucideIcon>)[
-    component.icon.charAt(0).toUpperCase() + component.icon.slice(1)
-  ] || LucideIcons.Square;
+  const IconComponent = getLucideIcon(component.icon);
 
   return (
     <Card 

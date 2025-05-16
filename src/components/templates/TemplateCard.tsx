@@ -1,8 +1,7 @@
 
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { LucideIcon } from "lucide-react";
-import * as LucideIcons from "lucide-react";
+import { getLucideIcon } from "@/utils/iconUtils";
 
 interface TemplateCardProps {
   id: string;
@@ -21,9 +20,7 @@ export default function TemplateCard({
   preview, 
   onSelect 
 }: TemplateCardProps) {
-  const IconComponent = (LucideIcons as Record<string, LucideIcon>)[
-    icon.charAt(0).toUpperCase() + icon.slice(1)
-  ] || LucideIcons.FileQuestion;
+  const IconComponent = getLucideIcon(icon);
 
   return (
     <Card className="overflow-hidden flex flex-col">

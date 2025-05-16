@@ -16,14 +16,14 @@ export default function ComponentLibraryItem({
 
   return (
     <Card 
-      className="p-3 cursor-grab drag-item flex items-center gap-3 hover:bg-accent/50 transition-all duration-200"
+      className="p-3 cursor-grab drag-item flex items-center gap-3 hover:bg-accent/50 transition-all duration-200 border border-border/50"
       draggable
       onDragStart={(e) => {
         e.dataTransfer.setData("componentType", component.type);
         onDragStart(component);
       }}
     >
-      <div className="p-2 rounded-md bg-gradient-to-br from-builder-blue-400 to-builder-blue-600 text-white shadow-sm">
+      <div className="p-2 rounded-md gradient-bg text-white shadow-sm">
         <IconComponent className="h-4 w-4" />
       </div>
       <div>

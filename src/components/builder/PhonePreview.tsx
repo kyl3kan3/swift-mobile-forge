@@ -65,7 +65,7 @@ export default function PhonePreview({
             <img 
               src={component.props.src} 
               alt={component.props.alt} 
-              className="w-full rounded-md"
+              className="w-full rounded-md shadow-sm"
               style={{ height: `${component.props.height}px` }}
             />
           </div>
@@ -75,8 +75,8 @@ export default function PhonePreview({
           <div key={component.id} className="px-4 py-2">
             <button className={`
               px-4 py-2 rounded-md 
-              ${component.props.variant === 'primary' ? 'bg-builder-blue-500 text-white' : ''}
-              ${component.props.variant === 'secondary' ? 'border border-builder-blue-500 text-builder-blue-500' : ''}
+              ${component.props.variant === 'primary' ? 'gradient-bg text-white' : ''}
+              ${component.props.variant === 'secondary' ? 'border border-indigo-500 text-indigo-500' : ''}
               ${component.props.size === 'small' ? 'text-sm' : ''}
               ${component.props.size === 'large' ? 'text-lg' : ''}
             `}>
@@ -106,19 +106,12 @@ export default function PhonePreview({
     }
   };
 
-  const getStatusBarStyle = () => {
-    if (platform === 'ios') {
-      return 'h-6 bg-black text-white flex justify-between items-center px-4 text-xs';
-    }
-    return 'h-6 bg-builder-blue-600 text-white flex justify-between items-center px-4 text-xs';
-  };
-
   return (
     <div className="flex justify-center items-start h-full">
       <div className={`
         w-72 h-[600px] bg-white rounded-[2.5rem] border-8 
         ${platform === 'ios' ? 'border-gray-800' : 'border-gray-700'}
-        shadow-xl overflow-hidden flex flex-col
+        shadow-elevated overflow-hidden flex flex-col phone-preview
       `}>
         {/* Notch for iOS */}
         {platform === 'ios' && (
@@ -135,7 +128,7 @@ export default function PhonePreview({
         
         {/* Status bar for Android */}
         {platform === 'android' && (
-          <div className="h-6 bg-builder-blue-600 text-white flex justify-between items-center px-4 text-xs">
+          <div className="h-6 gradient-bg text-white flex justify-between items-center px-4 text-xs">
             <span>{currentTime}</span>
             <div className="flex items-center gap-1">
               <div className="h-2 w-2 rounded-full bg-white"></div>

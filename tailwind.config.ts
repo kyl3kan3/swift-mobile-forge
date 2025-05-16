@@ -115,6 +115,10 @@ export default {
 				'scale-in': {
 					'0%': { transform: 'scale(0.95)', opacity: '0' },
 					'100%': { transform: 'scale(1)', opacity: '1' }
+				},
+				'pulse-soft': {
+					'0%, 100%': { opacity: '1' },
+					'50%': { opacity: '0.8' }
 				}
 			},
 			animation: {
@@ -123,7 +127,12 @@ export default {
 				'fade-in': 'fade-in 0.3s ease-in-out',
 				'fade-out': 'fade-out 0.3s ease-in-out',
 				'slide-in': 'slide-in 0.3s ease-out',
-				'scale-in': 'scale-in 0.3s ease-out'
+				'scale-in': 'scale-in 0.3s ease-out',
+				'pulse-soft': 'pulse-soft 2s ease-in-out infinite'
+			},
+			boxShadow: {
+				'card': '0px 4px 20px rgba(0, 0, 0, 0.05)',
+				'elevated': '0px 8px 30px rgba(0, 0, 0, 0.12)',
 			}
 		}
 	},

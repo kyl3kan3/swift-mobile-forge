@@ -99,3 +99,15 @@
   height: 6px;
   background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899);
 }
+
+/* Code generation dialog styles */
+pre {
+  background-color: #f7f8fa;
+  border-radius: 6px;
+  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  line-height: 1.5;
+}
+
+pre code {
+  color: #374151;
+}

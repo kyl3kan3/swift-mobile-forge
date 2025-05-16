@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
@@ -11,12 +10,14 @@ import {
   PhoneIcon,
   Tablet,
   Download,
-  Save
+  Save,
+  Code
 } from "lucide-react";
 import ComponentLibrary from "@/components/builder/ComponentLibrary";
 import ScreensList from "@/components/builder/ScreensList";
 import PhonePreview from "@/components/builder/PhonePreview";
 import ExportDialog from "@/components/builder/ExportDialog";
+import CodeGenerationDialog from "@/components/builder/CodeGenerationDialog";
 import {
   AppComponent,
   AppProject,
@@ -39,6 +40,7 @@ export default function AppBuilder() {
   const [draggedComponent, setDraggedComponent] = useState<ComponentDefinition | null>(null);
   const [platform, setPlatform] = useState<PlatformType>("ios");
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
+  const [isCodeDialogOpen, setIsCodeDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -187,9 +189,9 @@ export default function AppBuilder() {
           </Tabs>
         </div>
 
-        <div className="mt-4 pt-4 border-t">
+        <div className="mt-4 pt-4 border-t space-y-2">
           <Button 
-            className="w-full mb-2"
+            className="w-full"
             onClick={handleSaveProject}
             disabled={isSaving}
           >
@@ -209,6 +211,14 @@ export default function AppBuilder() {
           >
             <Download className="mr-2 h-4 w-4" />
             Export App
+          </Button>
+          <Button 
+            className="w-full" 
+            variant="secondary"
+            onClick={() => setIsCodeDialogOpen(true)}
+          >
+            <Code className="mr-2 h-4 w-4" />
+            Generate Code
           </Button>
         </div>
       </div>
@@ -262,11 +272,17 @@ export default function AppBuilder() {
         </div>
       </div>
 
-      {/* Export Dialog */}
+      {/* Dialogs */}
       <ExportDialog
         isOpen={isExportDialogOpen}
         onClose={() => setIsExportDialogOpen(false)}
         projectName={project?.name || "App"}
+      />
+
+      <CodeGenerationDialog 
+        isOpen={isCodeDialogOpen}
+        onClose={() => setIsCodeDialogOpen(false)}
+        project={project}
       />
     </div>
   );

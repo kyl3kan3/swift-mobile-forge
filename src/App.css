@@ -111,3 +111,38 @@ pre {
 pre code {
   color: #374151;
 }
+
+/* Enhanced AI features styles */
+.ai-glow {
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);
+}
+
+.ai-gradient-button {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.ai-gradient-button:hover {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.progress-gradient .progress-bar {
+  background: linear-gradient(to right, #6366f1, #8b5cf6, #ec4899);
+}
+
+/* Animation for AI processing */
+@keyframes pulse-purple {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse-purple {
+  animation: pulse-purple 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}

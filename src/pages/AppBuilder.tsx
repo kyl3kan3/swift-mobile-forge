@@ -16,7 +16,10 @@ import BuilderLeftSidebar from "@/components/builder/BuilderLeftSidebar";
 import BuilderTopToolbar from "@/components/builder/BuilderTopToolbar";
 import BuilderPreviewArea from "@/components/builder/BuilderPreviewArea";
 import ExportDialog from "@/components/builder/ExportDialog";
-import CodeGenerationDialog from "@/components/builder/CodeGenerationDialog";
+import EnhancedCodeGeneration from "@/components/builder/EnhancedCodeGeneration";
+import AIDesignAssistant from "@/components/builder/AIDesignAssistant";
+import { Button } from "@/components/ui/button";
+import { Sparkles } from "lucide-react";
 
 export default function AppBuilder() {
   const { projectId } = useParams();
@@ -27,9 +30,10 @@ export default function AppBuilder() {
   const [activeScreenId, setActiveScreenId] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [draggedComponent, setDraggedComponent] = useState<ComponentDefinition | null>(null);
-  const [platform, setPlatform] = useState<PlatformType>("ios");
+  const [platform, setPlatform] = useState<PlatformType>("both"); // Default to both platforms
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [isCodeDialogOpen, setIsCodeDialogOpen] = useState(false);
+  const [isAIDesignDialogOpen, setIsAIDesignDialogOpen] = useState(false);
 
   useEffect(() => {
     // Load project data
@@ -95,6 +99,10 @@ export default function AppBuilder() {
     setDraggedComponent(null);
   };
 
+  const handleUpdateProject = (updatedProject: AppProject) => {
+    setProject(updatedProject);
+  };
+
   return (
     <div className="flex h-screen">
       {/* Left Sidebar */}
@@ -112,10 +120,22 @@ export default function AppBuilder() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Top Bar */}
-        <BuilderTopToolbar
-          platform={platform}
-          setPlatform={setPlatform}
-        />
+        <div className="flex items-center justify-between">
+          <BuilderTopToolbar
+            platform={platform}
+            setPlatform={setPlatform}
+          />
+          
+          <Button 
+            variant="outline"
+            size="sm"
+            className="mr-4 bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200"
+            onClick={() => setIsAIDesignDialogOpen(true)}
+          >
+            <Sparkles className="mr-2 h-4 w-4 text-purple-500" />
+            AI Design
+          </Button>
+        </div>
 
         {/* Preview Area */}
         <BuilderPreviewArea
@@ -133,10 +153,18 @@ export default function AppBuilder() {
         projectName={project?.name || "App"}
       />
 
-      <CodeGenerationDialog 
+      <EnhancedCodeGeneration 
         isOpen={isCodeDialogOpen}
         onClose={() => setIsCodeDialogOpen(false)}
         project={project}
+      />
+      
+      <AIDesignAssistant
+        isOpen={isAIDesignDialogOpen}
+        onClose={() => setIsAIDesignDialogOpen(false)}
+        project={project}
+        activeScreenId={activeScreenId}
+        onUpdateProject={handleUpdateProject}
       />
     </div>
   );

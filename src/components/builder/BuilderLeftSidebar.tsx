@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Save, Download, Code } from "lucide-react";
+import { ArrowLeft, Save, Download, Code, Sparkles } from "lucide-react";
 import ComponentLibrary from "@/components/builder/ComponentLibrary";
 import ScreensList from "@/components/builder/ScreensList";
 import { AppProject, ComponentDefinition, AppScreen } from "@/types/appBuilder";
@@ -79,7 +79,7 @@ export default function BuilderLeftSidebar({
         <Button 
           variant="ghost" 
           size="icon"
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/dashboard')}
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>

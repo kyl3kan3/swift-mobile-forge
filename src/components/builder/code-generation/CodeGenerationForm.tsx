@@ -20,9 +20,9 @@ export default function CodeGenerationForm({
 
   return (
     <div className="space-y-4 my-4">
-      <div className="p-4 bg-accent/50 rounded-lg border border-accent">
+      <div className="p-4 bg-primary/5 backdrop-blur-sm rounded-lg border border-primary/10">
         <div className="flex items-center gap-2 mb-2">
-          <Sparkles className="h-4 w-4 text-purple-600" />
+          <Sparkles className="h-4 w-4 text-primary" />
           <h4 className="font-medium">AI Code Generator</h4>
         </div>
         <p className="text-sm text-muted-foreground">
@@ -32,7 +32,7 @@ export default function CodeGenerationForm({
       
       <Textarea 
         placeholder="Add specific instructions or requirements for the code generation..."
-        className="min-h-[120px] text-sm shadow-sm"
+        className="min-h-[120px] text-sm shadow-sm border-muted-foreground/20 focus:border-primary/50 resize-none bg-card/50"
         value={generationPrompt}
         onChange={(e) => setGenerationPrompt(e.target.value)}
         disabled={isGenerating}
@@ -44,7 +44,7 @@ export default function CodeGenerationForm({
             <span className="font-medium text-primary">Generating code</span>
             <span className="font-semibold">{Math.round(generationProgress)}%</span>
           </div>
-          <Progress value={generationProgress} className="h-2 bg-secondary" />
+          <Progress value={generationProgress} className="h-1.5 bg-secondary" />
           <p className="text-xs text-muted-foreground animate-pulse flex items-center gap-1.5">
             <Loader2 className="h-3 w-3 animate-spin" />
             AI is analyzing your app design and generating code...
@@ -55,7 +55,7 @@ export default function CodeGenerationForm({
       <Button 
         onClick={() => onGenerate(generationPrompt)} 
         disabled={isGenerating}
-        className="w-full btn-hover-lift"
+        className="w-full btn-hover-lift transition-all duration-300"
         variant={isGenerating ? "outline" : "default"}
       >
         {isGenerating ? (

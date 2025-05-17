@@ -10,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 
 interface ProjectCardProps {
   project: AppProject;
@@ -31,16 +32,17 @@ export default function ProjectCard({ project, onSelect, onDelete }: ProjectCard
 
   return (
     <Card 
-      className={`cursor-pointer transition-all duration-200 ${
-        isHovering ? 'shadow-md transform translate-y-[-4px]' : 'shadow-sm'
+      className={`overflow-hidden border-none transition-all duration-300 ${
+        isHovering ? 'shadow-xl translate-y-[-4px]' : 'shadow-md'
       }`}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
       onClick={() => onSelect(project.id)}
     >
+      <div className="h-2 bg-gradient-to-r from-builder-accent-purple via-primary to-builder-accent-green"></div>
       <CardHeader className="relative pb-2">
         <div className="flex justify-between items-start">
-          <CardTitle className="text-lg font-medium">{project.name}</CardTitle>
+          <CardTitle className="text-xl font-bold">{project.name}</CardTitle>
           <DropdownMenu>
             <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
               <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -51,34 +53,41 @@ export default function ProjectCard({ project, onSelect, onDelete }: ProjectCard
               <DropdownMenuItem onClick={(e) => {
                 e.stopPropagation();
                 onDelete(project.id);
-              }} className="text-destructive">
+              }} className="text-destructive cursor-pointer">
                 <Trash2 className="mr-2 h-4 w-4" />
                 Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        <p className="text-sm text-muted-foreground">{project.description}</p>
+        <p className="text-sm text-muted-foreground line-clamp-2">{project.description}</p>
       </CardHeader>
-      <CardContent className="pb-4">
-        <div className="flex gap-2 text-xs text-muted-foreground">
-          <div className="flex items-center">
+      <CardContent className="pb-4 pt-0">
+        <div className="flex gap-3 text-xs text-muted-foreground mt-3">
+          <div className="flex items-center px-2 py-1 rounded-full bg-accent/50">
             <MessageSquare className="mr-1 h-3 w-3" />
             {project.screens.length} screens
           </div>
-          <div className="flex items-center">
-            <Smartphone className="mr-1 h-3 w-3" />
-            Last updated {formatDate(project.updatedAt)}
-          </div>
+          <HoverCard>
+            <HoverCardTrigger asChild>
+              <div className="flex items-center px-2 py-1 rounded-full bg-accent/50 cursor-default">
+                <Smartphone className="mr-1 h-3 w-3" />
+                Updated {formatDate(project.updatedAt)}
+              </div>
+            </HoverCardTrigger>
+            <HoverCardContent className="w-auto p-2">
+              <p className="text-xs">Created: {formatDate(project.createdAt)}</p>
+            </HoverCardContent>
+          </HoverCard>
         </div>
       </CardContent>
-      <CardFooter className="pt-0">
+      <CardFooter className="pt-2 pb-4">
         <Button 
           onClick={(e) => {
             e.stopPropagation();
             onSelect(project.id);
           }} 
-          className="w-full bg-builder-blue-500 hover:bg-builder-blue-600"
+          className="w-full bg-gradient-to-r from-builder-blue-600 to-builder-blue-700 hover:from-builder-blue-700 hover:to-builder-blue-800 border-none transition-all duration-300"
         >
           Open Project
         </Button>

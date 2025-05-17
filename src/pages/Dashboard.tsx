@@ -38,8 +38,29 @@ export default function Dashboard() {
       } else {
         // Transform Supabase data to match AppProject format
         const formattedProjects: AppProject[] = data.map((project: any) => {
-          // Parse the app_config JSON safely
-          const appConfig = typeof project.app_config === 'object' ? project.app_config : {};
+          // Parse the app_config JSON safely and ensure it's an object
+          let appConfig: Record<string, any> = {};
+          
+          if (typeof project.app_config === 'object' && project.app_config !== null) {
+            appConfig = project.app_config as Record<string, any>;
+          } else if (typeof project.app_config === 'string') {
+            try {
+              appConfig = JSON.parse(project.app_config);
+            } catch (e) {
+              console.error("Failed to parse app_config:", e);
+            }
+          }
+          
+          // Now safely access properties with type assertions
+          const template = (appConfig.template as AppTemplate) || "blank";
+          const icon = (appConfig.icon as string) || "file";
+          const screens = (appConfig.screens as any[]) || [
+            {
+              id: uuidv4(),
+              name: "Home",
+              components: []
+            }
+          ];
           
           return {
             id: project.id,
@@ -47,15 +68,9 @@ export default function Dashboard() {
             description: project.description || "",
             createdAt: project.created_at,
             updatedAt: project.updated_at,
-            template: (appConfig?.template as AppTemplate) || "blank",
-            icon: appConfig?.icon || "file",
-            screens: appConfig?.screens || [
-              {
-                id: uuidv4(),
-                name: "Home",
-                components: []
-              }
-            ]
+            template,
+            icon,
+            screens
           };
         });
         

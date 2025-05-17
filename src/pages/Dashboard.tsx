@@ -37,22 +37,27 @@ export default function Dashboard() {
         setProjects(mockProjects);
       } else {
         // Transform Supabase data to match AppProject format
-        const formattedProjects: AppProject[] = data.map((project: any) => ({
-          id: project.id,
-          name: project.name,
-          description: project.description || "",
-          createdAt: project.created_at,
-          updatedAt: project.updated_at,
-          template: project.app_config?.template || "blank",
-          icon: project.app_config?.icon || "file",
-          screens: project.app_config?.screens || [
-            {
-              id: uuidv4(),
-              name: "Home",
-              components: []
-            }
-          ]
-        }));
+        const formattedProjects: AppProject[] = data.map((project: any) => {
+          // Parse the app_config JSON safely
+          const appConfig = typeof project.app_config === 'object' ? project.app_config : {};
+          
+          return {
+            id: project.id,
+            name: project.name,
+            description: project.description || "",
+            createdAt: project.created_at,
+            updatedAt: project.updated_at,
+            template: (appConfig?.template as AppTemplate) || "blank",
+            icon: appConfig?.icon || "file",
+            screens: appConfig?.screens || [
+              {
+                id: uuidv4(),
+                name: "Home",
+                components: []
+              }
+            ]
+          };
+        });
         
         // If no projects from Supabase, use mock data
         setProjects(formattedProjects.length > 0 ? formattedProjects : mockProjects);

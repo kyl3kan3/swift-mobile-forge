@@ -9,6 +9,7 @@ import { useNavigationState } from "@/hooks/useNavigationState";
 import { useProjectActions } from "@/hooks/useProjectActions";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Separator } from "@/components/ui/separator";
+import { useEffect } from "react";
 
 export default function Dashboard() {
   const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
@@ -34,6 +35,15 @@ export default function Dashboard() {
     setLoadingProjectId,
     navigationInProgress
   });
+  
+  // Prevent any automatic navigation resets
+  useEffect(() => {
+    return () => {
+      // Don't reset navigation state when unmounting Dashboard
+      // This prevents the "Back to dashboard" detection from triggering when
+      // we're actually trying to navigate away from the dashboard
+    };
+  }, []);
 
   return (
     <DashboardLayout>

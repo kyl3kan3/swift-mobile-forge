@@ -1,5 +1,5 @@
-
 import { Progress } from "@/components/ui/progress";
+import { useEffect } from "react";
 
 interface LoadingIndicatorProps {
   isNavigating: boolean;
@@ -7,6 +7,14 @@ interface LoadingIndicatorProps {
 }
 
 export default function LoadingIndicator({ isNavigating, progressValue }: LoadingIndicatorProps) {
+  useEffect(() => {
+    // When progress reaches 100%, we want to keep the indicator visible
+    if (progressValue === 100) {
+      // This is a visual cue that we're actually navigating
+      console.log("Navigation in progress, showing full progress bar");
+    }
+  }, [progressValue]);
+
   if (!isNavigating) return null;
   
   return (
@@ -15,7 +23,9 @@ export default function LoadingIndicator({ isNavigating, progressValue }: Loadin
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 flex-1 mr-4">
             <div className="animate-spin rounded-full h-5 w-5 border-2 border-primary border-r-transparent"></div>
-            <p className="text-sm font-medium">Opening project...</p>
+            <p className="text-sm font-medium">
+              {progressValue < 100 ? "Opening project..." : "Loading application..."}
+            </p>
           </div>
           <Progress value={progressValue} className="w-1/3 h-2" />
         </div>

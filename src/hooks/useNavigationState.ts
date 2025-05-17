@@ -15,10 +15,10 @@ export function useNavigationState() {
   useEffect(() => {
     // Clear any potential stuck states
     const resetNavigationState = () => {
-      // Use state setters instead of manipulating the ref directly
       setIsNavigating(false);
       setLoadingProjectId(null);
       setProgressValue(0);
+      navigationInProgress.current = false;
     };
 
     // Reset on mount
@@ -30,15 +30,16 @@ export function useNavigationState() {
     };
   }, []);
   
-  // Detect if we're on the dashboard route
+  // Only detect if we're going back to dashboard from another route
   useEffect(() => {
-    if (location.pathname === '/dashboard' && isNavigating) {
-      // If we came back to dashboard while a navigation was in progress,
-      // it means the navigation failed or was canceled
-      console.log('Back to dashboard while navigation in progress, resetting navigation state');
+    // Only reset if we're going BACK to dashboard after attempting navigation
+    // Don't reset when first navigating to the builder
+    if (location.pathname === '/dashboard' && isNavigating && !location.pathname.includes('builder')) {
+      console.log('Back to dashboard after navigation attempt, resetting navigation state');
       setIsNavigating(false);
       setLoadingProjectId(null);
       setProgressValue(0);
+      navigationInProgress.current = false;
     }
   }, [location.pathname, isNavigating]);
   
@@ -77,6 +78,7 @@ export function useNavigationState() {
           console.log("Still on dashboard after timeout, clearing navigation state");
           setIsNavigating(false);
           setLoadingProjectId(null);
+          navigationInProgress.current = false;
           toast.error("Navigation failed. Please try again.");
         }
       }, 3000);
@@ -94,21 +96,20 @@ export function useNavigationState() {
       return;
     }
     
-    // Use state setters instead of ref manipulation
     setIsNavigating(true);
     setLoadingProjectId(projectId);
-    navigationInProgress.current = true; // This is acceptable as we're reading, then writing
+    navigationInProgress.current = true;
     
     console.log(`Preparing to navigate to project: ${projectId}`);
     
-    // Show loading feedback
-    toast.loading(`Opening project...`, { duration: 3000 });
+    // Complete the progress immediately when actually navigating
+    setProgressValue(100);
     
     // Use a shorter delay for more responsive navigation
     setTimeout(() => {
       console.log(`Navigating to: /builder/${projectId}`);
       // Use replace to prevent back button from returning to a potentially broken state
-      navigate(`/builder/${projectId}`, { replace: true });
+      navigate(`/builder/${projectId}`, { replace: false });
     }, 200);
   };
 

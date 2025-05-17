@@ -66,6 +66,7 @@ export default function Dashboard() {
         onCreateProject={handleCreateProject}
       />
       
+      {/* Always render LoadingIndicator and let it handle its own visibility */}
       <LoadingIndicator isNavigating={isNavigating} progressValue={progressValue} />
     </DashboardLayout>
   );

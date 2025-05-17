@@ -23,7 +23,7 @@ export default function LoadingIndicator({ isNavigating, progressValue }: Loadin
       const timer = setTimeout(() => {
         setIsVisible(false);
         console.log("Navigation complete, hiding loading indicator");
-      }, 10000); // 10 second delay (increased from 7)
+      }, 15000); // 15 second delay (increased further)
       
       return () => clearTimeout(timer);
     }
@@ -43,6 +43,7 @@ export default function LoadingIndicator({ isNavigating, progressValue }: Loadin
             </p>
           </div>
           <Progress value={progressValue} className="w-full h-2" />
+          <p className="text-sm text-muted-foreground">Please wait while we load your project...</p>
         </div>
       </div>
     </div>

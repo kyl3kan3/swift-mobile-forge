@@ -63,10 +63,10 @@ export function useNavigationState() {
     let timeout: NodeJS.Timeout;
     
     if (isNavigating) {
-      // Extended timeout - if we're still on the Dashboard after 15 seconds, clear loading state
+      // Extended timeout - if we're still on the Dashboard after 20 seconds, clear loading state
       timeout = setTimeout(() => {
         if (location.pathname.includes('dashboard') && isNavigating) {
-          console.log("Navigation timeout - still on dashboard after 15 seconds");
+          console.log("Navigation timeout - still on dashboard after 20 seconds");
           setIsNavigating(false);
           setLoadingProjectId(null);
           navigationInProgress.current = false;
@@ -75,7 +75,7 @@ export function useNavigationState() {
           
           toast.error("Navigation failed. Please try again.");
         }
-      }, 15000); // Increased timeout
+      }, 20000); // Increased timeout further
     }
     
     return () => {
@@ -83,7 +83,7 @@ export function useNavigationState() {
     };
   }, [isNavigating, location.pathname]);
 
-  // Navigation function using a hybrid approach for maximum reliability
+  // Navigation function with a more aggressive approach to ensure navigation succeeds
   const navigateToBuilder = (projectId: string) => {
     if (navigationInProgress.current) {
       console.log("Navigation already in progress, ignoring additional request");
@@ -102,28 +102,16 @@ export function useNavigationState() {
     // Complete the progress animation
     setProgressValue(100);
     
-    // Try React Router navigation first
+    // Force a hard navigation using window.location.href
     setTimeout(() => {
-      console.log(`Navigating to project: ${projectId}`);
+      console.log(`Forcing navigation to project: ${projectId}`);
       
-      try {
-        // Use React Router's navigate function
-        navigate(`/builder/${projectId}`);
-        
-        // Fallback to direct navigation after a delay if still on dashboard
-        setTimeout(() => {
-          if (location.pathname.includes('dashboard')) {
-            console.log("Fallback to direct navigation");
-            const timestamp = new Date().getTime();
-            window.location.href = `/builder/${projectId}?t=${timestamp}`;
-          }
-        }, 2000);
-      } catch (error) {
-        console.error("Navigation error:", error);
-        // Immediate fallback
-        const timestamp = new Date().getTime();
-        window.location.href = `/builder/${projectId}?t=${timestamp}`;
-      }
+      // Use direct URL navigation with a cache-busting parameter
+      const timestamp = new Date().getTime();
+      window.location.href = `/builder/${projectId}?t=${timestamp}`;
+      
+      // We don't use React Router's navigate here anymore as it seems to be problematic
+      // This is a more direct and reliable approach for this specific case
     }, 500);
   };
 

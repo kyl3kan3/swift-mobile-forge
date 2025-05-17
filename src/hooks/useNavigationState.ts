@@ -15,7 +15,7 @@ export function useNavigationState() {
   useEffect(() => {
     // Clear any potential stuck states
     const resetNavigationState = () => {
-      navigationInProgress.current = false;
+      // Use state setters instead of manipulating the ref directly
       setIsNavigating(false);
       setLoadingProjectId(null);
       setProgressValue(0);
@@ -36,7 +36,6 @@ export function useNavigationState() {
       // If we came back to dashboard while a navigation was in progress,
       // it means the navigation failed or was canceled
       console.log('Back to dashboard while navigation in progress, resetting navigation state');
-      navigationInProgress.current = false;
       setIsNavigating(false);
       setLoadingProjectId(null);
       setProgressValue(0);
@@ -76,7 +75,6 @@ export function useNavigationState() {
       timeout = setTimeout(() => {
         if (location.pathname.includes('dashboard')) {
           console.log("Still on dashboard after timeout, clearing navigation state");
-          navigationInProgress.current = false;
           setIsNavigating(false);
           setLoadingProjectId(null);
           toast.error("Navigation failed. Please try again.");
@@ -96,9 +94,11 @@ export function useNavigationState() {
       return;
     }
     
-    navigationInProgress.current = true;
+    // Use state setters instead of ref manipulation
     setIsNavigating(true);
     setLoadingProjectId(projectId);
+    navigationInProgress.current = true; // This is acceptable as we're reading, then writing
+    
     console.log(`Preparing to navigate to project: ${projectId}`);
     
     // Show loading feedback

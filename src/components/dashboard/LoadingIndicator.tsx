@@ -1,29 +1,29 @@
-
 import { Progress } from "@/components/ui/progress";
 import { useEffect, useState } from "react";
 
 interface LoadingIndicatorProps {
   isNavigating: boolean;
   progressValue: number;
+  message?: string;
 }
 
-export default function LoadingIndicator({ isNavigating, progressValue }: LoadingIndicatorProps) {
-  // Local state for visibility control
+export default function LoadingIndicator({ 
+  isNavigating, 
+  progressValue, 
+  message = "Opening project..." 
+}: LoadingIndicatorProps) {
   const [isVisible, setIsVisible] = useState(false);
   
   useEffect(() => {
-    // Show immediately when navigation starts
     if (isNavigating) {
       setIsVisible(true);
-      console.log("Navigation started, showing loading indicator");
-    }
-    
-    // Delay hiding when navigation completes
-    if (!isNavigating && isVisible) {
+      console.log("Loading indicator displayed");
+    } else if (!isNavigating && isVisible) {
+      // Keep indicator visible for a moment after navigation completes
       const timer = setTimeout(() => {
         setIsVisible(false);
-        console.log("Navigation complete, hiding loading indicator");
-      }, 2000); // Just 2 seconds delay - we'll keep it visible while navigating
+        console.log("Loading indicator hidden");
+      }, 500);
       
       return () => clearTimeout(timer);
     }
@@ -37,16 +37,13 @@ export default function LoadingIndicator({ isNavigating, progressValue }: Loadin
         <div className="flex flex-col items-center gap-4">
           <div className="flex items-center gap-3 w-full">
             <div className="animate-spin rounded-full h-6 w-6 border-2 border-primary border-r-transparent"></div>
-            <p className="text-base font-medium">
-              {progressValue < 100 ? "Opening project..." : "Navigating to builder..."}
-            </p>
+            <p className="text-base font-medium">{message}</p>
           </div>
           
           <Progress value={progressValue} className="w-full h-2" />
           
           <div className="text-sm text-muted-foreground text-center">
-            <p className="mb-1">We're preparing your project environment.</p>
-            <p>This may take a few moments...</p>
+            <p>This may take a moment...</p>
           </div>
         </div>
       </div>

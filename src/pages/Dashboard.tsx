@@ -16,7 +16,7 @@ import { useNavigationState } from "@/hooks/useNavigationState";
 import { useProjectActions } from "@/hooks/useProjectActions";
 
 export default function Dashboard() {
-  // State for dialogs
+  // First, define all state hooks
   const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
   
   // Initialize navigation state
@@ -24,10 +24,10 @@ export default function Dashboard() {
     isNavigating,
     loadingProjectId,
     progressValue,
-    navigationInProgress,
+    navigateToBuilder,
     setIsNavigating,
     setLoadingProjectId,
-    navigateToBuilder
+    navigationStarted
   } = useNavigationState();
   
   // Initialize project data and actions
@@ -41,13 +41,20 @@ export default function Dashboard() {
     navigateToBuilder,
     setIsNavigating,
     setLoadingProjectId,
-    navigationInProgress
+    navigationStarted
   });
   
-  // Log when dashboard mounts
+  // Effect hooks after state declarations
   useEffect(() => {
     console.log("Dashboard mounted, projects count:", projects.length);
   }, [projects]);
+
+  // Determine loading message based on state
+  const getLoadingMessage = () => {
+    if (progressValue < 50) return "Preparing project...";
+    if (progressValue < 90) return "Opening project...";
+    return "Navigating to builder...";
+  };
 
   return (
     <DashboardLayout>
@@ -74,10 +81,11 @@ export default function Dashboard() {
         onCreateProject={handleCreateProject}
       />
       
-      {/* Loading overlay with its own visibility control */}
+      {/* Loading overlay with improved message handling */}
       <LoadingIndicator 
         isNavigating={isNavigating} 
         progressValue={progressValue} 
+        message={getLoadingMessage()}
       />
     </DashboardLayout>
   );

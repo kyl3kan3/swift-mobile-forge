@@ -9,21 +9,21 @@ interface UseProjectActionsProps {
   navigateToBuilder: (projectId: string) => void;
   setIsNavigating: (isNavigating: boolean) => void;
   setLoadingProjectId: (projectId: string | null) => void;
-  navigationInProgress: React.RefObject<boolean>;
+  navigationStarted: boolean;
 }
 
 export function useProjectActions({
   navigateToBuilder,
   setIsNavigating,
   setLoadingProjectId,
-  navigationInProgress
+  navigationStarted
 }: UseProjectActionsProps) {
   const { projects, isLoading, createProject, deleteProject } = useProjects();
   const { toast: shadowToast } = useToast();
   
   // Handle project creation
   const handleCreateProject = useCallback(async (name: string, description: string, template: AppTemplate) => {
-    if (navigationInProgress.current) {
+    if (navigationStarted) {
       console.log("Navigation in progress, ignoring create project request");
       return;
     }
@@ -42,7 +42,6 @@ export function useProjectActions({
         
         // Navigate to the new project
         console.log("Navigating to newly created project:", newProjectId);
-        setLoadingProjectId(newProjectId);
         navigateToBuilder(newProjectId);
       } else {
         // Handle creation failure
@@ -56,18 +55,18 @@ export function useProjectActions({
       setLoadingProjectId(null);
       toast.error("An error occurred while creating your project.");
     }
-  }, [createProject, navigateToBuilder, navigationInProgress, setIsNavigating, setLoadingProjectId, shadowToast]);
+  }, [createProject, navigateToBuilder, navigationStarted, setIsNavigating, setLoadingProjectId]);
 
   // Handle project selection
   const handleSelectProject = useCallback((id: string) => {
-    if (navigationInProgress.current) {
+    if (navigationStarted) {
       console.log("Navigation in progress, ignoring project selection");
       return;
     }
     
     console.log("Project selected:", id);
     navigateToBuilder(id);
-  }, [navigateToBuilder, navigationInProgress]);
+  }, [navigateToBuilder, navigationStarted]);
 
   // Handle project deletion
   const handleDeleteProject = useCallback(async (id: string) => {

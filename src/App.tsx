@@ -11,6 +11,9 @@ import RequireAuth from "@/components/common/RequireAuth";
 // Load the Index page eagerly as it's the first one users see
 import Index from "./pages/Index";
 
+// Import SimpleProjects page directly
+import SimpleProjects from "./pages/SimpleProjects";
+
 // Lazy load other pages for better performance
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Projects = lazy(() => import("./pages/Projects"));
@@ -52,6 +55,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
               <Route path="/projects" element={<RequireAuth><Projects /></RequireAuth>} />
+              <Route path="/simple-projects" element={<SimpleProjects />} />
               <Route path="/templates" element={<RequireAuth><TemplateGallery /></RequireAuth>} />
               <Route path="/templates/:projectId" element={<RequireAuth><TemplateGallery /></RequireAuth>} />
               <Route path="/builder/:projectId" element={<RequireAuth><AppBuilder /></RequireAuth>} />

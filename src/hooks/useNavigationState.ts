@@ -13,6 +13,7 @@ export function useNavigationState() {
   const navigationInProgress = useRef(false);
   const navigationStartTime = useRef<number | null>(null);
   const navigationAttempts = useRef(0);
+  const forceNavigate = useRef(false);
   
   // Then other hooks
   const location = useLocation();
@@ -32,6 +33,7 @@ export function useNavigationState() {
       navigationInProgress.current = false;
       navigationStartTime.current = null;
       navigationAttempts.current = 0;
+      forceNavigate.current = false;
       console.log("Initial dashboard load, resetting navigation state");
     }
   }, [location.pathname, isNavigating]);
@@ -40,7 +42,7 @@ export function useNavigationState() {
   useEffect(() => {
     let interval: NodeJS.Timeout;
     
-    if (isNavigating && loadingProjectId) {
+    if (isNavigating) {
       // Reset progress
       setProgressValue(0);
       
@@ -56,25 +58,27 @@ export function useNavigationState() {
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isNavigating, loadingProjectId]);
+  }, [isNavigating]);
   
   // Clear loading state if navigation takes too long
   useEffect(() => {
     let timeout: NodeJS.Timeout;
     
     if (isNavigating) {
-      // Extended timeout - if we're still on the Dashboard after 15 seconds, clear the loading state
+      // Extended timeout - if we're still on the Dashboard after 12 seconds, clear loading state
       timeout = setTimeout(() => {
         if (location.pathname.includes('dashboard') && isNavigating) {
-          console.log("Navigation timeout - still on dashboard after 15 seconds");
+          console.log("Navigation timeout - still on dashboard after 12 seconds");
           setIsNavigating(false);
           setLoadingProjectId(null);
           navigationInProgress.current = false;
           navigationStartTime.current = null;
           navigationAttempts.current = 0;
+          forceNavigate.current = false;
+          
           toast.error("Navigation failed. Please try again.");
         }
-      }, 15000); // Increased to 15 seconds
+      }, 12000);
     }
     
     return () => {
@@ -82,7 +86,20 @@ export function useNavigationState() {
     };
   }, [isNavigating, location.pathname]);
 
-  // New two-phase navigation approach
+  // Force navigation if React Router doesn't work after multiple attempts
+  useEffect(() => {
+    if (isNavigating && loadingProjectId && navigationAttempts.current >= 2 && forceNavigate.current) {
+      forceNavigate.current = false; // Reset to prevent multiple redirections
+      
+      console.log(`Forcing hard navigation to project: ${loadingProjectId} after failed attempts`);
+      
+      // Force a full page navigation as last resort
+      const timestamp = new Date().getTime();
+      window.location.href = `/builder/${loadingProjectId}?t=${timestamp}`;
+    }
+  }, [isNavigating, loadingProjectId]);
+
+  // Navigation function that tries React Router first, then falls back to full page navigation
   const navigateToBuilder = (projectId: string) => {
     if (navigationInProgress.current) {
       console.log("Navigation already in progress, ignoring additional request");
@@ -96,16 +113,23 @@ export function useNavigationState() {
     setLoadingProjectId(projectId);
     navigationInProgress.current = true;
     navigationStartTime.current = Date.now();
+    navigationAttempts.current += 1;
     
     // Complete the progress animation
     setProgressValue(100);
     
-    // First phase: show the loading indicator
+    // Try React Router navigation first
     setTimeout(() => {
-      // Second phase: navigate using React Router
-      console.log(`Navigating to project: ${projectId}`);
+      console.log(`Navigating to project: ${projectId} (attempt ${navigationAttempts.current})`);
+      
+      // If this is our third attempt, prepare for forced navigation on next tick
+      if (navigationAttempts.current >= 2) {
+        forceNavigate.current = true;
+      }
+      
+      // Use React Router
       navigate(`/builder/${projectId}`);
-    }, 500); // Small delay to ensure loading indicator shows first
+    }, 300);
   };
 
   return {

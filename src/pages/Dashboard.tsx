@@ -11,9 +11,7 @@ import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Separator } from "@/components/ui/separator";
 
 export default function Dashboard() {
-  // Fix hook order: declare all hooks at the top level
-  const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
-  
+  // Fix hook order issues by ensuring consistent hook ordering
   const {
     isNavigating,
     loadingProjectId,
@@ -36,6 +34,9 @@ export default function Dashboard() {
     setLoadingProjectId,
     navigationInProgress
   });
+  
+  // Declare useState hooks after other hook calls to maintain consistent order
+  const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
   
   useEffect(() => {
     // Log when dashboard mounts

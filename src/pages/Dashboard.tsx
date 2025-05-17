@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import ProjectsSection from "@/components/dashboard/ProjectsSection";
 import PromoBanner from "@/components/dashboard/PromoBanner";
@@ -9,10 +9,11 @@ import { useNavigationState } from "@/hooks/useNavigationState";
 import { useProjectActions } from "@/hooks/useProjectActions";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Separator } from "@/components/ui/separator";
-import { useEffect } from "react";
 
 export default function Dashboard() {
+  // Fix hook order: declare all hooks at the top level
   const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
+  
   const {
     isNavigating,
     loadingProjectId,
@@ -39,9 +40,6 @@ export default function Dashboard() {
   useEffect(() => {
     // Log when dashboard mounts
     console.log("Dashboard mounted");
-    
-    // Don't reset navigation state on unmount - let the navigation complete
-    // No cleanup needed
   }, []);
 
   return (

@@ -1,6 +1,6 @@
 
 import { Progress } from "@/components/ui/progress";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 interface LoadingIndicatorProps {
   isNavigating: boolean;
@@ -8,14 +8,30 @@ interface LoadingIndicatorProps {
 }
 
 export default function LoadingIndicator({ isNavigating, progressValue }: LoadingIndicatorProps) {
-  useEffect(() => {
-    if (progressValue === 100) {
-      console.log("Navigation in progress, showing full progress bar");
-    }
-  }, [progressValue]);
+  // Add local state to prevent premature unmounting
+  const [isVisible, setIsVisible] = useState(false);
   
-  // Exit early if not navigating
-  if (!isNavigating) return null;
+  useEffect(() => {
+    if (isNavigating) {
+      setIsVisible(true);
+      console.log("Navigation started, showing loading indicator");
+    }
+    
+    // Only hide the indicator if navigation is complete AND we were previously navigating
+    // This prevents the indicator from disappearing too soon
+    if (!isNavigating && isVisible) {
+      // Add a delay before hiding to ensure the navigation completes
+      const timer = setTimeout(() => {
+        setIsVisible(false);
+        console.log("Navigation complete, hiding loading indicator");
+      }, 2000); // 2 second delay
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isNavigating, isVisible]);
+  
+  // Use local state for visibility instead of prop
+  if (!isVisible) return null;
   
   return (
     <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center">

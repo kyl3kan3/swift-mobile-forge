@@ -1,13 +1,14 @@
 
 import { useState } from "react";
 import { useProjects } from "@/hooks/useProjects";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { PlusCircle, Loader2 } from "lucide-react";
 import NewProjectDialog from "@/components/builder/NewProjectDialog";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import { toast } from "sonner";
 
 export default function Projects() {
   const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
@@ -18,17 +19,20 @@ export default function Projects() {
     try {
       const newProjectId = await createProject(name, description, template);
       if (newProjectId) {
-        // Direct navigation without the complex state management
-        navigate(`/builder/${newProjectId}`);
+        toast.success(`Project "${name}" created successfully`);
+        // Use direct navigation for maximum compatibility
+        window.location.href = `/builder/${newProjectId}`;
       }
     } catch (error) {
       console.error("Error creating project:", error);
+      toast.error("Failed to create project");
     }
   };
 
   const handleSelectProject = (id: string) => {
-    // Direct navigation to the project builder
-    navigate(`/builder/${id}`);
+    console.log("Project selected:", id);
+    // Use direct navigation for maximum compatibility
+    window.location.href = `/builder/${id}`;
   };
 
   return (
@@ -36,9 +40,9 @@ export default function Projects() {
       <div className="flex flex-col gap-6">
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center pt-4 pb-10 space-y-4 md:space-y-0">
           <div className="space-y-2">
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight">Simple Projects</h1>
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight">Projects</h1>
             <p className="text-muted-foreground text-lg">
-              A simpler way to access your projects
+              Manage your app projects
             </p>
           </div>
           <Button 

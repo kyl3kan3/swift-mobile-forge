@@ -2,7 +2,7 @@
 import { AppProject } from "@/types/appBuilder";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { MessageSquare, MoreVertical, Trash2, CalendarDays, Calendar } from "lucide-react";
+import { MessageSquare, MoreVertical, Trash2, CalendarDays, Calendar, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { 
   DropdownMenu,
@@ -16,9 +16,10 @@ interface ProjectCardProps {
   project: AppProject;
   onSelect: (id: string) => void;
   onDelete: (id: string) => void;
+  isLoading?: boolean;
 }
 
-export default function ProjectCard({ project, onSelect, onDelete }: ProjectCardProps) {
+export default function ProjectCard({ project, onSelect, onDelete, isLoading = false }: ProjectCardProps) {
   const [isHovering, setIsHovering] = useState(false);
   
   const formatDate = (dateString: string) => {
@@ -30,8 +31,13 @@ export default function ProjectCard({ project, onSelect, onDelete }: ProjectCard
     });
   };
 
-  // Simplified click handler that properly checks if click is from dropdown
+  // Prevent navigation when loading
   const handleCardClick = (e: React.MouseEvent) => {
+    if (isLoading) {
+      e.preventDefault();
+      return;
+    }
+    
     const target = e.target as HTMLElement;
     // Don't handle card clicks from dropdown or button
     if (target.closest('.dropdown-trigger') || target.closest('.card-button')) {
@@ -50,6 +56,12 @@ export default function ProjectCard({ project, onSelect, onDelete }: ProjectCard
 
   // Dedicated handler for the button to prevent event bubbling
   const handleButtonClick = (e: React.MouseEvent) => {
+    if (isLoading) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    
     e.preventDefault();
     e.stopPropagation();
     onSelect(project.id);
@@ -58,9 +70,9 @@ export default function ProjectCard({ project, onSelect, onDelete }: ProjectCard
   return (
     <Card 
       className={`overflow-hidden border-none transition-all duration-500 ${
-        isHovering ? 'shadow-2xl translate-y-[-8px]' : 'shadow-lg'
-      } group backdrop-blur-sm bg-card/90 cursor-pointer`}
-      onMouseEnter={() => setIsHovering(true)}
+        isHovering && !isLoading ? 'shadow-2xl translate-y-[-8px]' : 'shadow-lg'
+      } group backdrop-blur-sm bg-card/90 ${isLoading ? 'opacity-80 cursor-wait' : 'cursor-pointer'}`}
+      onMouseEnter={() => !isLoading && setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
       onClick={handleCardClick}
     >
@@ -75,6 +87,7 @@ export default function ProjectCard({ project, onSelect, onDelete }: ProjectCard
                 size="icon" 
                 className="h-8 w-8 dropdown-trigger"
                 onClick={(e) => e.stopPropagation()}
+                disabled={isLoading}
               >
                 <MoreVertical className="h-4 w-4" />
               </Button>
@@ -115,8 +128,16 @@ export default function ProjectCard({ project, onSelect, onDelete }: ProjectCard
         <Button 
           onClick={handleButtonClick}
           className="card-button w-full bg-gradient-to-r from-builder-blue-600 to-builder-blue-700 hover:from-builder-blue-700 hover:to-builder-blue-800 border-none transition-all duration-500 shadow-md group-hover:shadow-lg py-6"
+          disabled={isLoading}
         >
-          Open Project
+          {isLoading ? (
+            <div className="flex items-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>Opening...</span>
+            </div>
+          ) : (
+            "Open Project"
+          )}
         </Button>
       </CardFooter>
     </Card>

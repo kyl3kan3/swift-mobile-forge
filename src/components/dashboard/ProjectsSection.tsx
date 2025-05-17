@@ -12,6 +12,7 @@ interface ProjectsSectionProps {
   onSelectProject: (id: string) => void;
   onDeleteProject: (id: string) => void;
   onNewProject: () => void;
+  loadingProjectId?: string | null;
 }
 
 export default function ProjectsSection({
@@ -19,7 +20,8 @@ export default function ProjectsSection({
   isLoading,
   onSelectProject,
   onDeleteProject,
-  onNewProject
+  onNewProject,
+  loadingProjectId
 }: ProjectsSectionProps) {
   const [filters, setFilters] = useState<ProjectFiltersType>({
     searchQuery: "",
@@ -86,6 +88,7 @@ export default function ProjectsSection({
               project={project}
               onSelect={onSelectProject}
               onDelete={onDeleteProject}
+              isLoading={loadingProjectId === project.id}
             />
           ))
         ) : (

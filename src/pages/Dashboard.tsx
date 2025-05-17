@@ -1,5 +1,5 @@
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useProjects } from "@/hooks/useProjects";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
@@ -9,14 +9,73 @@ import NewProjectDialog from "@/components/builder/NewProjectDialog";
 import { AppTemplate } from "@/types/appBuilder";
 import { useToast } from "@/components/ui/use-toast";
 import { toast } from "sonner";
+import { Progress } from "@/components/ui/progress";
 
 export default function Dashboard() {
   const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [loadingProjectId, setLoadingProjectId] = useState<string | null>(null);
+  const [progressValue, setProgressValue] = useState(0);
   const navigationInProgress = useRef(false);
   const navigate = useNavigate();
   const { projects, isLoading, createProject, deleteProject } = useProjects();
   const { toast: shadowToast } = useToast();
+  
+  // Clear any stuck navigation states on component mount
+  useEffect(() => {
+    return () => {
+      // Clean up any pending navigation states when component unmounts
+      navigationInProgress.current = false;
+      setIsNavigating(false);
+      setLoadingProjectId(null);
+    };
+  }, []);
+  
+  // Progress animation
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    
+    if (isNavigating && loadingProjectId) {
+      // Reset progress
+      setProgressValue(0);
+      
+      // Animate progress from 0 to 90% over 1.5 seconds
+      interval = setInterval(() => {
+        setProgressValue(prev => {
+          const newValue = prev + 5;
+          return newValue < 90 ? newValue : 90;
+        });
+      }, 100);
+    } else {
+      setProgressValue(0);
+    }
+    
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isNavigating, loadingProjectId]);
+  
+  // Clear loading state if we're still on Dashboard after a delay
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+    
+    if (isNavigating) {
+      // If we're still on the Dashboard after 3 seconds, clear the loading state
+      timeout = setTimeout(() => {
+        if (document.location.pathname.includes('dashboard')) {
+          console.log("Still on dashboard after timeout, clearing navigation state");
+          navigationInProgress.current = false;
+          setIsNavigating(false);
+          setLoadingProjectId(null);
+          toast.error("Navigation failed. Please try again.");
+        }
+      }, 3000);
+    }
+    
+    return () => {
+      if (timeout) clearTimeout(timeout);
+    };
+  }, [isNavigating]);
 
   // Stable navigation function to prevent multiple calls or race conditions
   const navigateToBuilder = useCallback((projectId: string) => {
@@ -27,6 +86,7 @@ export default function Dashboard() {
     
     navigationInProgress.current = true;
     setIsNavigating(true);
+    setLoadingProjectId(projectId);
     console.log(`Preparing to navigate to project: ${projectId}`);
     
     // Show loading feedback
@@ -41,6 +101,7 @@ export default function Dashboard() {
       setTimeout(() => {
         navigationInProgress.current = false;
         setIsNavigating(false);
+        setLoadingProjectId(null);
       }, 500);
     }, 300);
   }, [navigate]);
@@ -56,6 +117,7 @@ export default function Dashboard() {
       if (newProjectId) {
         // Close dialog first before navigation
         setIsNewProjectDialogOpen(false);
+        setLoadingProjectId(newProjectId);
         
         // Show success message with Sonner toast
         toast.success(`Project "${name}" created successfully`);
@@ -64,10 +126,18 @@ export default function Dashboard() {
         console.log("Navigating to newly created project:", newProjectId);
         setTimeout(() => {
           navigate(`/builder/${newProjectId}`);
+          
+          // Reset navigation flags after a delay
+          setTimeout(() => {
+            navigationInProgress.current = false;
+            setIsNavigating(false);
+            setLoadingProjectId(null);
+          }, 500);
         }, 500);
       } else {
         navigationInProgress.current = false;
         setIsNavigating(false);
+        setLoadingProjectId(null);
         setIsNewProjectDialogOpen(false);
         shadowToast({
           title: "Error",
@@ -79,6 +149,7 @@ export default function Dashboard() {
       console.error("Error in handleCreateProject:", error);
       navigationInProgress.current = false;
       setIsNavigating(false);
+      setLoadingProjectId(null);
       setIsNewProjectDialogOpen(false);
       shadowToast({
         title: "Error",
@@ -114,6 +185,7 @@ export default function Dashboard() {
           onSelectProject={handleSelectProject}
           onDeleteProject={handleDeleteProject}
           onNewProject={() => setIsNewProjectDialogOpen(true)}
+          loadingProjectId={loadingProjectId}
         />
         
         <PromoBanner />
@@ -123,6 +195,20 @@ export default function Dashboard() {
           onClose={() => setIsNewProjectDialogOpen(false)}
           onCreateProject={handleCreateProject}
         />
+        
+        {isNavigating && (
+          <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/90 backdrop-blur-sm border-t border-border z-50">
+            <div className="container max-w-7xl mx-auto">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3 flex-1 mr-4">
+                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-primary border-r-transparent"></div>
+                  <p className="text-sm font-medium">Opening project...</p>
+                </div>
+                <Progress value={progressValue} className="w-1/3 h-2" />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

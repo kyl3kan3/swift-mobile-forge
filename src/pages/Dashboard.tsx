@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import ProjectsSection from "@/components/dashboard/ProjectsSection";
@@ -35,12 +36,10 @@ export default function Dashboard() {
     navigationInProgress
   });
   
-  // Prevent any automatic navigation resets when leaving the Dashboard
+  // This component should not interfere with navigation state when unmounting
   useEffect(() => {
     return () => {
-      // Keep navigation state when unmounting Dashboard and navigating away
-      // This prevents the "Back to dashboard" detection from triggering when
-      // we're actually trying to navigate away from the dashboard
+      // Intentionally empty to prevent cleanup from interfering with navigation
     };
   }, []);
 

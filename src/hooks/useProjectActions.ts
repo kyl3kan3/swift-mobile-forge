@@ -5,7 +5,7 @@ import { AppTemplate } from "@/types/appBuilder";
 import { toast } from "sonner";
 
 interface UseProjectActionsProps {
-  navigateToBuilder: (projectId: string) => void;
+  navigateToBuilder: (projectId: string) => boolean;
   setIsNavigating: (isNavigating: boolean) => void;
   setLoadingProjectId: (projectId: string | null) => void;
   navigationStarted: boolean;
@@ -21,6 +21,7 @@ export function useProjectActions({
   const handleCreateProject = useCallback(async (name: string, description: string, template: AppTemplate) => {
     if (navigationStarted) {
       console.log("Navigation in progress, ignoring create project request");
+      toast.error("Navigation in progress. Please wait.");
       return;
     }
     
@@ -49,6 +50,7 @@ export function useProjectActions({
   const handleSelectProject = useCallback((id: string) => {
     if (navigationStarted) {
       console.log("Navigation in progress, ignoring project selection");
+      toast.error("Navigation already in progress. Please wait.");
       return;
     }
     
@@ -58,6 +60,12 @@ export function useProjectActions({
 
   // Handle project deletion
   const handleDeleteProject = useCallback(async (id: string) => {
+    if (navigationStarted) {
+      console.log("Navigation in progress, ignoring delete request");
+      toast.error("Navigation in progress. Please wait.");
+      return;
+    }
+    
     try {
       await deleteProject(id);
       toast.success("Project deleted successfully");
@@ -65,7 +73,7 @@ export function useProjectActions({
       console.error("Error deleting project:", error);
       toast.error("Failed to delete project");
     }
-  }, [deleteProject]);
+  }, [deleteProject, navigationStarted]);
 
   return {
     projects,

@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Separator } from "@/components/ui/separator";
 
 // Import components
@@ -35,20 +35,15 @@ export default function Dashboard() {
     handleDeleteProject
   } = useProjectActions({
     navigateToBuilder,
-    setIsNavigating: () => {}, // We'll let useNavigationState handle this
-    setLoadingProjectId: () => {}, // We'll let useNavigationState handle this
+    setIsNavigating: () => {}, // Navigation state is handled internally in useNavigationState
+    setLoadingProjectId: () => {}, // Navigation state is handled internally in useNavigationState
     navigationStarted: isNavigating
   });
-  
-  // Log information for debugging
-  useEffect(() => {
-    console.log("Dashboard mounted, projects count:", projects.length);
-  }, [projects]);
 
   // Determine loading message based on progress
   const getLoadingMessage = () => {
-    if (progressValue < 50) return "Preparing project...";
-    if (progressValue < 90) return "Opening project...";
+    if (progressValue < 30) return "Preparing project...";
+    if (progressValue < 70) return "Loading project...";
     return "Navigating to builder...";
   };
 

@@ -13,7 +13,6 @@ export function useNavigationState() {
   const navigationInProgress = useRef(false);
   const navigationStartTime = useRef<number | null>(null);
   const navigationAttempts = useRef(0);
-  const forceNavigate = useRef(false);
   
   // Then other hooks
   const location = useLocation();
@@ -27,14 +26,13 @@ export function useNavigationState() {
       !isNavigating;
       
     if (isInitialDashboardLoad) {
+      console.log("Initial dashboard load, resetting navigation state");
       setIsNavigating(false);
       setLoadingProjectId(null);
       setProgressValue(0);
       navigationInProgress.current = false;
       navigationStartTime.current = null;
       navigationAttempts.current = 0;
-      forceNavigate.current = false;
-      console.log("Initial dashboard load, resetting navigation state");
     }
   }, [location.pathname, isNavigating]);
   
@@ -65,20 +63,19 @@ export function useNavigationState() {
     let timeout: NodeJS.Timeout;
     
     if (isNavigating) {
-      // Extended timeout - if we're still on the Dashboard after 12 seconds, clear loading state
+      // Extended timeout - if we're still on the Dashboard after 15 seconds, clear loading state
       timeout = setTimeout(() => {
         if (location.pathname.includes('dashboard') && isNavigating) {
-          console.log("Navigation timeout - still on dashboard after 12 seconds");
+          console.log("Navigation timeout - still on dashboard after 15 seconds");
           setIsNavigating(false);
           setLoadingProjectId(null);
           navigationInProgress.current = false;
           navigationStartTime.current = null;
           navigationAttempts.current = 0;
-          forceNavigate.current = false;
           
           toast.error("Navigation failed. Please try again.");
         }
-      }, 12000);
+      }, 15000); // Increased timeout
     }
     
     return () => {
@@ -86,20 +83,7 @@ export function useNavigationState() {
     };
   }, [isNavigating, location.pathname]);
 
-  // Force navigation if React Router doesn't work after multiple attempts
-  useEffect(() => {
-    if (isNavigating && loadingProjectId && navigationAttempts.current >= 2 && forceNavigate.current) {
-      forceNavigate.current = false; // Reset to prevent multiple redirections
-      
-      console.log(`Forcing hard navigation to project: ${loadingProjectId} after failed attempts`);
-      
-      // Force a full page navigation as last resort
-      const timestamp = new Date().getTime();
-      window.location.href = `/builder/${loadingProjectId}?t=${timestamp}`;
-    }
-  }, [isNavigating, loadingProjectId]);
-
-  // Navigation function that tries React Router first, then falls back to full page navigation
+  // Navigation function using a hybrid approach for maximum reliability
   const navigateToBuilder = (projectId: string) => {
     if (navigationInProgress.current) {
       console.log("Navigation already in progress, ignoring additional request");
@@ -120,16 +104,27 @@ export function useNavigationState() {
     
     // Try React Router navigation first
     setTimeout(() => {
-      console.log(`Navigating to project: ${projectId} (attempt ${navigationAttempts.current})`);
+      console.log(`Navigating to project: ${projectId}`);
       
-      // If this is our third attempt, prepare for forced navigation on next tick
-      if (navigationAttempts.current >= 2) {
-        forceNavigate.current = true;
+      try {
+        // Use React Router's navigate function
+        navigate(`/builder/${projectId}`);
+        
+        // Fallback to direct navigation after a delay if still on dashboard
+        setTimeout(() => {
+          if (location.pathname.includes('dashboard')) {
+            console.log("Fallback to direct navigation");
+            const timestamp = new Date().getTime();
+            window.location.href = `/builder/${projectId}?t=${timestamp}`;
+          }
+        }, 2000);
+      } catch (error) {
+        console.error("Navigation error:", error);
+        // Immediate fallback
+        const timestamp = new Date().getTime();
+        window.location.href = `/builder/${projectId}?t=${timestamp}`;
       }
-      
-      // Use React Router
-      navigate(`/builder/${projectId}`);
-    }, 300);
+    }, 500);
   };
 
   return {

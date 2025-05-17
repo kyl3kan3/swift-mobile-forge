@@ -12,6 +12,8 @@ import { Separator } from "@/components/ui/separator";
 
 export default function Dashboard() {
   // Fix hook order issues by ensuring consistent hook ordering
+  const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
+  
   const {
     isNavigating,
     loadingProjectId,
@@ -34,9 +36,6 @@ export default function Dashboard() {
     setLoadingProjectId,
     navigationInProgress
   });
-  
-  // Declare useState hooks after other hook calls to maintain consistent order
-  const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
   
   useEffect(() => {
     // Log when dashboard mounts

@@ -23,7 +23,7 @@ export default function LoadingIndicator({ isNavigating, progressValue }: Loadin
       const timer = setTimeout(() => {
         setIsVisible(false);
         console.log("Navigation complete, hiding loading indicator");
-      }, 7000); // 7 second delay
+      }, 10000); // 10 second delay (increased from 7)
       
       return () => clearTimeout(timer);
     }

@@ -22,7 +22,10 @@ export function useProjectActions({
   const { toast: shadowToast } = useToast();
   
   const handleCreateProject = useCallback(async (name: string, description: string, template: AppTemplate) => {
-    if (navigationInProgress.current) return;
+    if (navigationInProgress.current) {
+      console.log("Navigation in progress, ignoring create project request");
+      return;
+    }
     
     try {
       // Set loading state first
@@ -63,9 +66,14 @@ export function useProjectActions({
   }, [createProject, navigateToBuilder, navigationInProgress, setIsNavigating, setLoadingProjectId, shadowToast]);
 
   const handleSelectProject = useCallback((id: string) => {
+    if (navigationInProgress.current) {
+      console.log("Navigation in progress, ignoring project selection");
+      return;
+    }
+    
     console.log("Project selected:", id);
     navigateToBuilder(id);
-  }, [navigateToBuilder]);
+  }, [navigateToBuilder, navigationInProgress]);
 
   const handleDeleteProject = useCallback(async (id: string) => {
     try {

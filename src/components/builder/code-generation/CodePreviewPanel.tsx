@@ -4,6 +4,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Check, Download, Copy } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface CodePreviewPanelProps {
   code: string;
@@ -20,6 +21,7 @@ export default function CodePreviewPanel({
 }: CodePreviewPanelProps) {
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
+  const [currentView, setCurrentView] = useState<"code" | "preview">("code");
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(code);

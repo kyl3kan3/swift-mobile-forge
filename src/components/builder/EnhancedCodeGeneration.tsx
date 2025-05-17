@@ -13,7 +13,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AppProject } from "@/types/appBuilder";
 import { FileCode, Code } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import { generateCodeForAllPlatforms } from "@/utils/codeGenerationUtils";
 import CodePreviewPanel from "./code-generation/CodePreviewPanel";
 import CodeGenerationForm from "./code-generation/CodeGenerationForm";
 
@@ -33,6 +32,7 @@ export default function EnhancedCodeGeneration({
   const [generatedCode, setGeneratedCode] = useState<Record<string, string>>({});
   const [codeExplanation, setCodeExplanation] = useState("");
   const [activeTab, setActiveTab] = useState("react");
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   const platformLabels = {
@@ -48,36 +48,59 @@ export default function EnhancedCodeGeneration({
     setIsGenerating(true);
     setGeneratedCode({});
     setGenerationProgress(0);
+    setError(null);
     
     try {
-      // Simulate the AI generation process with progress updates
-      const updateProgress = () => {
-        const interval = setInterval(() => {
-          setGenerationProgress((prev) => {
-            const newProgress = prev + Math.random() * 15;
-            if (newProgress >= 100) {
-              clearInterval(interval);
-              return 100;
-            }
-            return newProgress;
-          });
-        }, 500);
-        
-        return interval;
+      // Start progress animation
+      const interval = setInterval(() => {
+        setGenerationProgress((prev) => {
+          const newProgress = prev + Math.random() * 5;
+          return newProgress >= 90 ? 90 : newProgress;
+        });
+      }, 300);
+      
+      // Create project data for API request
+      const projectData = {
+        name: project.name,
+        description: project.description || "",
+        screens: project.screens.map(screen => ({
+          name: screen.name,
+          components: screen.components.map(comp => ({
+            type: comp.type,
+            props: comp.props
+          }))
+        }))
       };
       
-      const interval = updateProgress();
+      // Call the OpenAI code generation edge function
+      const response = await fetch('/api/generate-code', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt,
+          project: projectData,
+          platform: activeTab
+        }),
+      });
       
-      // Simulate API call to AI service
-      await new Promise(resolve => setTimeout(resolve, 3500));
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate code');
+      }
       
-      // Generate code for all platforms
-      const sampleCode = generateCodeForAllPlatforms(project);
+      const result = await response.json();
       
       clearInterval(interval);
       setGenerationProgress(100);
-      setGeneratedCode(sampleCode);
-      setCodeExplanation("This code implementation includes all the screens and components from your app design. The navigation structure has been set up with the proper routes between screens. Component styling matches your design specifications, and all functionality described in your components has been implemented.");
+      
+      // Set generated code from the API response
+      const codeResponse: Record<string, string> = {};
+      codeResponse[activeTab] = result.generatedCode;
+      
+      setGeneratedCode(codeResponse);
+      setCodeExplanation(result.explanation || "Code has been generated based on your app design and requirements. The implementation includes all screens and components from your design with proper navigation and styling.");
       
       toast({
         title: "Code Generated",
@@ -85,13 +108,15 @@ export default function EnhancedCodeGeneration({
       });
     } catch (error) {
       console.error("Error generating code:", error);
+      setError(error instanceof Error ? error.message : 'An unknown error occurred');
       toast({
         title: "Error",
-        description: "Failed to generate code. Please try again.",
+        description: error instanceof Error ? error.message : 'Failed to generate code. Please try again.',
         variant: "destructive"
       });
     } finally {
       setIsGenerating(false);
+      setGenerationProgress(100);
     }
   };
 
@@ -126,7 +151,7 @@ export default function EnhancedCodeGeneration({
             AI Code Generator
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            Generate production-ready native code for your app design using artificial intelligence.
+            Generate production-ready native code for your app design using OpenAI.
           </DialogDescription>
         </DialogHeader>
 
@@ -135,6 +160,9 @@ export default function EnhancedCodeGeneration({
             isGenerating={isGenerating}
             generationProgress={generationProgress}
             onGenerate={generateCode}
+            error={error}
+            platform={activeTab}
+            onPlatformChange={setActiveTab}
           />
         ) : (
           <div className="flex-1 flex flex-col overflow-hidden">

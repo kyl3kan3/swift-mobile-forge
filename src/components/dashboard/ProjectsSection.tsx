@@ -4,6 +4,7 @@ import ProjectCard from "@/components/dashboard/ProjectCard";
 import NewProjectCard from "@/components/dashboard/NewProjectCard";
 import { AppProject } from "@/types/appBuilder";
 import ProjectFilters, { ProjectFilters as ProjectFiltersType } from "@/components/dashboard/ProjectFilters";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ProjectsSectionProps {
   projects: AppProject[];
@@ -63,7 +64,7 @@ export default function ProjectsSection({
   };
 
   return (
-    <>
+    <ScrollArea className="flex-1">
       <div className="mt-6 mb-6 flex items-center gap-3">
         <div className="h-10 w-1.5 bg-gradient-to-b from-primary via-builder-accent-purple to-builder-accent-green rounded-full shadow-lg"></div>
         <h2 className="text-2xl font-semibold tracking-tight">Your Projects</h2>
@@ -93,6 +94,6 @@ export default function ProjectsSection({
           </div>
         )}
       </div>
-    </>
+    </ScrollArea>
   );
 }

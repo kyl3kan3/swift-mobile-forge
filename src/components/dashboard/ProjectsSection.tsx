@@ -5,6 +5,7 @@ import NewProjectCard from "@/components/dashboard/NewProjectCard";
 import { AppProject } from "@/types/appBuilder";
 import ProjectFilters, { ProjectFilters as ProjectFiltersType } from "@/components/dashboard/ProjectFilters";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface ProjectsSectionProps {
   projects: AppProject[];
@@ -65,37 +66,71 @@ export default function ProjectsSection({
     setFilters(newFilters);
   };
 
-  return (
-    <ScrollArea className="flex-1">
-      <div className="mt-6 mb-6 flex items-center gap-3">
-        <div className="h-10 w-1.5 bg-gradient-to-b from-primary via-builder-accent-purple to-builder-accent-green rounded-full shadow-lg"></div>
-        <h2 className="text-2xl font-semibold tracking-tight">Your Projects</h2>
-      </div>
+  // Get projects by template type
+  const getProjectsByTemplate = (template: string) => {
+    if (template === 'all') return filteredProjects;
+    return projects.filter(p => p.template === template);
+  };
 
-      <ProjectFilters onFilterChange={handleFilterChange} />
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mb-16">
-        <NewProjectCard onClick={onNewProject} />
-        {isLoading ? (
-          // Loading placeholders
-          Array(3).fill(0).map((_, index) => (
-            <div key={index} className="bg-accent/50 rounded-lg h-[260px] animate-pulse"></div>
-          ))
-        ) : filteredProjects.length > 0 ? (
-          filteredProjects.map(project => (
-            <ProjectCard
-              key={project.id}
-              project={project}
-              onSelect={onSelectProject}
-              onDelete={onDeleteProject}
-              isLoading={loadingProjectId === project.id}
-            />
-          ))
-        ) : (
-          <div className="col-span-full text-center py-12">
-            <p className="text-muted-foreground">No matching projects found.</p>
+  // Get templates that have at least one project
+  const availableTemplates = ['all', ...Array.from(new Set(projects.map(p => p.template)))];
+  
+  const renderProjects = (projectsList: AppProject[]) => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {projectsList.length > 0 ? (
+        projectsList.map(project => (
+          <ProjectCard
+            key={project.id}
+            project={project}
+            onSelect={onSelectProject}
+            onDelete={onDeleteProject}
+            isLoading={loadingProjectId === project.id}
+          />
+        ))
+      ) : (
+        <div className="col-span-full text-center py-12">
+          <p className="text-muted-foreground">No matching projects found.</p>
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <ScrollArea className="flex-1 pr-4">
+      <div className="space-y-8 pb-16">
+        <ProjectFilters onFilterChange={handleFilterChange} />
+        
+        <Tabs defaultValue="all" className="w-full">
+          <div className="mb-6 -mt-2">
+            <TabsList className="bg-accent/50">
+              {availableTemplates.map(template => (
+                <TabsTrigger 
+                  key={template} 
+                  value={template}
+                  className="capitalize"
+                >
+                  {template === 'all' ? 'All Projects' : template}
+                </TabsTrigger>
+              ))}
+            </TabsList>
           </div>
-        )}
+          
+          {availableTemplates.map(template => (
+            <TabsContent key={template} value={template} className="m-0">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {template === 'all' && <NewProjectCard onClick={onNewProject} />}
+                {isLoading ? (
+                  // Loading placeholders
+                  Array(3).fill(0).map((_, index) => (
+                    <div key={index} className="bg-accent/50 rounded-lg h-[250px] animate-pulse"></div>
+                  ))
+                ) : (
+                  renderProjects(getProjectsByTemplate(template))
+                )}
+              </div>
+            </TabsContent>
+          ))}
+        </Tabs>
       </div>
     </ScrollArea>
   );

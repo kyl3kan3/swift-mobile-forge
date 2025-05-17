@@ -8,6 +8,7 @@ import LoadingIndicator from "@/components/dashboard/LoadingIndicator";
 import { useNavigationState } from "@/hooks/useNavigationState";
 import { useProjectActions } from "@/hooks/useProjectActions";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import { Separator } from "@/components/ui/separator";
 
 export default function Dashboard() {
   const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
@@ -36,18 +37,21 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout>
-      <DashboardHeader onNewProject={() => setIsNewProjectDialogOpen(true)} />
-      
-      <ProjectsSection 
-        projects={projects}
-        isLoading={isLoading}
-        onSelectProject={handleSelectProject}
-        onDeleteProject={handleDeleteProject}
-        onNewProject={() => setIsNewProjectDialogOpen(true)}
-        loadingProjectId={loadingProjectId}
-      />
-      
-      <PromoBanner />
+      <div className="flex flex-col gap-6">
+        <DashboardHeader onNewProject={() => setIsNewProjectDialogOpen(true)} />
+        <Separator className="bg-accent/50" />
+        
+        <ProjectsSection 
+          projects={projects}
+          isLoading={isLoading}
+          onSelectProject={handleSelectProject}
+          onDeleteProject={handleDeleteProject}
+          onNewProject={() => setIsNewProjectDialogOpen(true)}
+          loadingProjectId={loadingProjectId}
+        />
+        
+        <PromoBanner />
+      </div>
 
       <NewProjectDialog
         isOpen={isNewProjectDialogOpen}

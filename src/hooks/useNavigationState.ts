@@ -9,6 +9,7 @@ export function useNavigationState() {
   const [progressValue, setProgressValue] = useState(0);
   const navigationInProgress = useRef(false);
   const navigationStartTime = useRef<number | null>(null);
+  const navigationAttempts = useRef(0);
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -25,40 +26,10 @@ export function useNavigationState() {
       setProgressValue(0);
       navigationInProgress.current = false;
       navigationStartTime.current = null;
+      navigationAttempts.current = 0;
       console.log("Initial dashboard load, resetting navigation state");
     }
   }, [location.pathname, isNavigating]);
-  
-  // Handle failed navigation cases
-  useEffect(() => {
-    // Only run if we attempted navigation but ended up back at dashboard
-    if (location.pathname === '/dashboard' && navigationInProgress.current) {
-      console.log('Possible navigation failure detected');
-      
-      // Make sure we've been navigating for at least 2 seconds before considering it a failure
-      // This prevents prematurely resetting if we're just starting navigation
-      const timeElapsed = navigationStartTime.current ? Date.now() - navigationStartTime.current : 0;
-      if (timeElapsed < 2000) {
-        console.log(`Navigation too recent (${timeElapsed}ms), not considering as failure yet`);
-        return;
-      }
-      
-      // Delay to ensure we're not resetting during an active navigation
-      const timeout = setTimeout(() => {
-        if (location.pathname === '/dashboard' && navigationInProgress.current) {
-          console.log('Navigation failed - still on dashboard after timeout');
-          setIsNavigating(false);
-          setLoadingProjectId(null);
-          setProgressValue(0);
-          navigationInProgress.current = false;
-          navigationStartTime.current = null;
-          toast.error("Could not open project. Please try again.");
-        }
-      }, 3000); // Increased timeout
-      
-      return () => clearTimeout(timeout);
-    }
-  }, [location.pathname]);
   
   // Progress animation
   useEffect(() => {
@@ -87,17 +58,18 @@ export function useNavigationState() {
     let timeout: NodeJS.Timeout;
     
     if (isNavigating) {
-      // Extended timeout - if we're still on the Dashboard after 8 seconds, clear the loading state
+      // Extended timeout - if we're still on the Dashboard after 10 seconds, clear the loading state
       timeout = setTimeout(() => {
         if (location.pathname.includes('dashboard') && isNavigating) {
-          console.log("Navigation timeout - still on dashboard after 8 seconds");
+          console.log("Navigation timeout - still on dashboard after 10 seconds");
           setIsNavigating(false);
           setLoadingProjectId(null);
           navigationInProgress.current = false;
           navigationStartTime.current = null;
+          navigationAttempts.current = 0;
           toast.error("Navigation failed. Please try again.");
         }
-      }, 8000);
+      }, 10000);
     }
     
     return () => {
@@ -119,39 +91,15 @@ export function useNavigationState() {
     setLoadingProjectId(projectId);
     navigationInProgress.current = true;
     navigationStartTime.current = Date.now();
+    navigationAttempts.current = 0;
     
     // Complete the progress immediately
     setProgressValue(100);
     
-    // Use a multi-step navigation approach
+    // Use direct browser navigation which is more reliable
     setTimeout(() => {
-      console.log(`Executing navigation to: /builder/${projectId}`);
-      
-      // First attempt: window.location.assign preserves history but is more reliable than navigate()
-      window.location.assign(`/builder/${projectId}`);
-      
-      // Second attempt as fallback
-      const fallbackTimer = setTimeout(() => {
-        if (document.location.pathname === '/dashboard') {
-          console.log("First navigation attempt failed, trying hard redirect");
-          // Hard redirect if we're still on dashboard
-          window.location.href = `/builder/${projectId}`;
-        }
-      }, 1200);
-      
-      // Third attempt as final fallback
-      const finalFallbackTimer = setTimeout(() => {
-        if (document.location.pathname === '/dashboard') {
-          console.log("Second navigation attempt failed, trying React Router navigate");
-          // If we're still here, try React Router navigate with replace
-          navigate(`/builder/${projectId}`, { replace: true });
-        }
-      }, 2500);
-      
-      return () => {
-        clearTimeout(fallbackTimer);
-        clearTimeout(finalFallbackTimer);
-      };
+      // Use window.location.href for most reliable navigation
+      window.location.href = `/builder/${projectId}`;
     }, 500);
   };
 

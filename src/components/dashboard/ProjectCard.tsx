@@ -30,10 +30,10 @@ export default function ProjectCard({ project, onSelect, onDelete }: ProjectCard
     });
   };
 
+  // Single handler function to prevent event conflicts
   const handleSelect = (e: React.MouseEvent) => {
-    // Stop event propagation to prevent double triggering
+    e.preventDefault();
     e.stopPropagation();
-    // Select the project
     onSelect(project.id);
   };
 

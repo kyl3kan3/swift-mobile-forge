@@ -2,7 +2,7 @@
 import { AppProject } from "@/types/appBuilder";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { LucideIcon, MessageSquare, MoreVertical, Smartphone, Trash2 } from "lucide-react";
+import { LucideIcon, MessageSquare, MoreVertical, Smartphone, Trash2, CalendarDays, Calendar } from "lucide-react";
 import { useState } from "react";
 import { 
   DropdownMenu,
@@ -32,24 +32,24 @@ export default function ProjectCard({ project, onSelect, onDelete }: ProjectCard
 
   return (
     <Card 
-      className={`overflow-hidden border-none transition-all duration-300 ${
-        isHovering ? 'shadow-xl translate-y-[-4px]' : 'shadow-md'
-      }`}
+      className={`overflow-hidden border-none transition-all duration-500 ${
+        isHovering ? 'shadow-2xl translate-y-[-8px]' : 'shadow-lg'
+      } group backdrop-blur-sm bg-card/90`}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
       onClick={() => onSelect(project.id)}
     >
-      <div className="h-2 bg-gradient-to-r from-builder-accent-purple via-primary to-builder-accent-green"></div>
-      <CardHeader className="relative pb-2">
+      <div className="h-1.5 bg-gradient-to-r from-primary via-builder-accent-purple to-builder-accent-green"></div>
+      <CardHeader className="relative pb-3">
         <div className="flex justify-between items-start">
-          <CardTitle className="text-xl font-bold">{project.name}</CardTitle>
+          <CardTitle className="text-xl font-bold tracking-tight">{project.name}</CardTitle>
           <DropdownMenu>
             <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
               <Button variant="ghost" size="icon" className="h-8 w-8">
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="shadow-xl bg-card/95 backdrop-blur-sm border-primary/5">
               <DropdownMenuItem onClick={(e) => {
                 e.stopPropagation();
                 onDelete(project.id);
@@ -60,34 +60,37 @@ export default function ProjectCard({ project, onSelect, onDelete }: ProjectCard
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        <p className="text-sm text-muted-foreground line-clamp-2">{project.description}</p>
+        <p className="text-sm text-muted-foreground line-clamp-2 mt-1.5 max-w-[90%] leading-relaxed">{project.description}</p>
       </CardHeader>
       <CardContent className="pb-4 pt-0">
-        <div className="flex gap-3 text-xs text-muted-foreground mt-3">
-          <div className="flex items-center px-2 py-1 rounded-full bg-accent/50">
-            <MessageSquare className="mr-1 h-3 w-3" />
+        <div className="flex gap-3 text-xs mt-4">
+          <div className="flex items-center px-3 py-1.5 rounded-full bg-accent/80 shadow-sm backdrop-blur-sm">
+            <MessageSquare className="mr-1.5 h-3 w-3" />
             {project.screens.length} screens
           </div>
           <HoverCard>
             <HoverCardTrigger asChild>
-              <div className="flex items-center px-2 py-1 rounded-full bg-accent/50 cursor-default">
-                <Smartphone className="mr-1 h-3 w-3" />
-                Updated {formatDate(project.updatedAt)}
+              <div className="flex items-center px-3 py-1.5 rounded-full bg-accent/80 cursor-default shadow-sm backdrop-blur-sm">
+                <CalendarDays className="mr-1.5 h-3 w-3" />
+                <span className="whitespace-nowrap">Updated {formatDate(project.updatedAt)}</span>
               </div>
             </HoverCardTrigger>
-            <HoverCardContent className="w-auto p-2">
-              <p className="text-xs">Created: {formatDate(project.createdAt)}</p>
+            <HoverCardContent className="w-auto p-3 shadow-xl bg-card/95 backdrop-blur-md">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-primary" />
+                <p className="text-xs">Created: {formatDate(project.createdAt)}</p>
+              </div>
             </HoverCardContent>
           </HoverCard>
         </div>
       </CardContent>
-      <CardFooter className="pt-2 pb-4">
+      <CardFooter className="pt-3 pb-5">
         <Button 
           onClick={(e) => {
             e.stopPropagation();
             onSelect(project.id);
           }} 
-          className="w-full bg-gradient-to-r from-builder-blue-600 to-builder-blue-700 hover:from-builder-blue-700 hover:to-builder-blue-800 border-none transition-all duration-300"
+          className="w-full bg-gradient-to-r from-builder-blue-600 to-builder-blue-700 hover:from-builder-blue-700 hover:to-builder-blue-800 border-none transition-all duration-500 shadow-md group-hover:shadow-lg py-6"
         >
           Open Project
         </Button>

@@ -15,7 +15,8 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,
-      refetchOnWindowFocus: false
+      refetchOnWindowFocus: false,
+      staleTime: 0 // Make sure data is always fresh
     }
   }
 });
@@ -24,7 +25,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
-      <Sonner />
+      <Sonner position="bottom-right" />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />

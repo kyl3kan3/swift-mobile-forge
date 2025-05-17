@@ -16,18 +16,45 @@ export default function Dashboard() {
   const { toast } = useToast();
 
   const handleCreateProject = async (name: string, description: string, template: AppTemplate) => {
-    const newProjectId = await createProject(name, description, template);
-    if (newProjectId) {
-      navigate(`/builder/${newProjectId}`);
+    try {
+      const newProjectId = await createProject(name, description, template);
+      if (newProjectId) {
+        // Close dialog first before navigation
+        setIsNewProjectDialogOpen(false);
+        
+        // Ensure the state is updated before navigating
+        setTimeout(() => {
+          console.log("Navigating to newly created project:", newProjectId);
+          navigate(`/builder/${newProjectId}`);
+        }, 100);
+      } else {
+        setIsNewProjectDialogOpen(false);
+        toast({
+          title: "Error",
+          description: "Failed to create project. Please try again.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error("Error in handleCreateProject:", error);
+      setIsNewProjectDialogOpen(false);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive"
+      });
     }
-    setIsNewProjectDialogOpen(false);
   };
 
   const handleSelectProject = (id: string) => {
+    // Log and use a small timeout to ensure UI state is settled before navigation
     console.log("Opening project:", id);
     
-    // Navigate directly without toast to prevent UI flashing
-    navigate(`/builder/${id}`);
+    // Add a small delay to ensure state updates before navigation
+    setTimeout(() => {
+      console.log("Navigating to:", `/builder/${id}`);
+      navigate(`/builder/${id}`);
+    }, 100);
   };
 
   return (

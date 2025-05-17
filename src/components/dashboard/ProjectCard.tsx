@@ -31,45 +31,38 @@ export default function ProjectCard({ project, onSelect, onDelete, isLoading = f
     });
   };
 
-  // Prevent navigation when loading
+  // Simple click handler without unnecessary event prevention
   const handleCardClick = (e: React.MouseEvent) => {
-    if (isLoading) {
-      e.preventDefault();
-      return;
-    }
+    // Don't handle clicks when loading
+    if (isLoading) return;
     
-    const target = e.target as HTMLElement;
     // Don't handle card clicks from dropdown or button
-    if (target.closest('.dropdown-trigger') || target.closest('.card-button')) {
-      return;
+    if (e.target instanceof Element) {
+      const target = e.target as HTMLElement;
+      if (target.closest('.dropdown-trigger') || target.closest('.card-button')) {
+        return;
+      }
     }
     
-    console.log("Project card clicked:", project.id);
     onSelect(project.id);
   };
 
   const handleDeleteClick = (e: React.MouseEvent) => {
-    e.preventDefault();
     e.stopPropagation();
     onDelete(project.id);
   };
 
-  // Dedicated handler for the button to prevent event bubbling
+  // Simple button handler
   const handleButtonClick = (e: React.MouseEvent) => {
-    if (isLoading) {
-      e.preventDefault();
-      e.stopPropagation();
-      return;
-    }
-    
-    e.preventDefault();
     e.stopPropagation();
-    onSelect(project.id);
+    if (!isLoading) {
+      onSelect(project.id);
+    }
   };
 
   return (
     <Card 
-      className={`overflow-hidden border-none transition-all duration-500 ${
+      className={`overflow-hidden border-none transition-all duration-300 ${
         isHovering && !isLoading ? 'shadow-2xl translate-y-[-8px]' : 'shadow-lg'
       } group backdrop-blur-sm bg-card/90 ${isLoading ? 'opacity-80 cursor-wait' : 'cursor-pointer'}`}
       onMouseEnter={() => !isLoading && setIsHovering(true)}
@@ -92,7 +85,7 @@ export default function ProjectCard({ project, onSelect, onDelete, isLoading = f
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="shadow-xl bg-card/95 backdrop-blur-sm border-primary/5">
+            <DropdownMenuContent align="end" className="shadow-xl bg-card/95 backdrop-blur-sm border-primary/5 z-50">
               <DropdownMenuItem onClick={handleDeleteClick} className="text-destructive cursor-pointer">
                 <Trash2 className="mr-2 h-4 w-4" />
                 Delete
@@ -115,7 +108,7 @@ export default function ProjectCard({ project, onSelect, onDelete, isLoading = f
                 <span className="whitespace-nowrap">Updated {formatDate(project.updatedAt)}</span>
               </div>
             </HoverCardTrigger>
-            <HoverCardContent className="w-auto p-3 shadow-xl bg-card/95 backdrop-blur-md">
+            <HoverCardContent className="w-auto p-3 shadow-xl bg-card/95 backdrop-blur-md z-50">
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-primary" />
                 <p className="text-xs">Created: {formatDate(project.createdAt)}</p>
@@ -127,7 +120,7 @@ export default function ProjectCard({ project, onSelect, onDelete, isLoading = f
       <CardFooter className="pt-3 pb-5">
         <Button 
           onClick={handleButtonClick}
-          className="card-button w-full bg-gradient-to-r from-builder-blue-600 to-builder-blue-700 hover:from-builder-blue-700 hover:to-builder-blue-800 border-none transition-all duration-500 shadow-md group-hover:shadow-lg py-6"
+          className="card-button w-full bg-gradient-to-r from-builder-blue-600 to-builder-blue-700 hover:from-builder-blue-700 hover:to-builder-blue-800 border-none transition-all duration-300 shadow-md group-hover:shadow-lg py-6"
           disabled={isLoading}
         >
           {isLoading ? (

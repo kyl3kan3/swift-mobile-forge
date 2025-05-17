@@ -16,7 +16,7 @@ const queryClient = new QueryClient({
     queries: {
       retry: 1,
       refetchOnWindowFocus: false,
-      staleTime: 5000, // Increase stale time to reduce unnecessary fetches
+      staleTime: 10000, // Increase stale time to reduce unnecessary fetches
       gcTime: 300000 // 5 minutes garbage collection time (previously cacheTime)
     }
   }
@@ -26,7 +26,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
-      <Sonner position="bottom-right" closeButton />
+      <Sonner position="bottom-right" closeButton richColors />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />

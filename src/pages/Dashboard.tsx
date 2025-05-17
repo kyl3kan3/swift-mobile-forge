@@ -1,6 +1,6 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useProjects } from "@/hooks/useProjects";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import ProjectsSection from "@/components/dashboard/ProjectsSection";
@@ -18,18 +18,41 @@ export default function Dashboard() {
   const [progressValue, setProgressValue] = useState(0);
   const navigationInProgress = useRef(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { projects, isLoading, createProject, deleteProject } = useProjects();
   const { toast: shadowToast } = useToast();
   
-  // Clear any stuck navigation states on component mount
+  // Reset navigation state on mount and clean up on unmount
   useEffect(() => {
-    return () => {
-      // Clean up any pending navigation states when component unmounts
+    // Clear any potential stuck states
+    const resetNavigationState = () => {
       navigationInProgress.current = false;
       setIsNavigating(false);
       setLoadingProjectId(null);
+      setProgressValue(0);
+    };
+
+    // Reset on mount
+    resetNavigationState();
+
+    return () => {
+      // Clean up any pending navigation states when component unmounts
+      resetNavigationState();
     };
   }, []);
+  
+  // Detect if we're on the dashboard route
+  useEffect(() => {
+    if (location.pathname === '/dashboard' && isNavigating) {
+      // If we came back to dashboard while a navigation was in progress,
+      // it means the navigation failed or was canceled
+      console.log('Back to dashboard while navigation in progress, resetting navigation state');
+      navigationInProgress.current = false;
+      setIsNavigating(false);
+      setLoadingProjectId(null);
+      setProgressValue(0);
+    }
+  }, [location.pathname, isNavigating]);
   
   // Progress animation
   useEffect(() => {
@@ -62,7 +85,7 @@ export default function Dashboard() {
     if (isNavigating) {
       // If we're still on the Dashboard after 3 seconds, clear the loading state
       timeout = setTimeout(() => {
-        if (document.location.pathname.includes('dashboard')) {
+        if (location.pathname.includes('dashboard')) {
           console.log("Still on dashboard after timeout, clearing navigation state");
           navigationInProgress.current = false;
           setIsNavigating(false);
@@ -75,9 +98,9 @@ export default function Dashboard() {
     return () => {
       if (timeout) clearTimeout(timeout);
     };
-  }, [isNavigating]);
+  }, [isNavigating, location.pathname]);
 
-  // Stable navigation function to prevent multiple calls or race conditions
+  // Stable navigation function with decisive push navigation
   const navigateToBuilder = useCallback((projectId: string) => {
     if (navigationInProgress.current) {
       console.log("Navigation already in progress, ignoring additional request");
@@ -90,20 +113,14 @@ export default function Dashboard() {
     console.log(`Preparing to navigate to project: ${projectId}`);
     
     // Show loading feedback
-    toast.loading(`Opening project...`, { duration: 1500 });
+    toast.loading(`Opening project...`, { duration: 3000 });
     
-    // Use setTimeout with a slightly longer delay to ensure state updates
+    // Use a shorter delay for more responsive navigation
     setTimeout(() => {
       console.log(`Navigating to: /builder/${projectId}`);
-      navigate(`/builder/${projectId}`);
-      
-      // Reset navigation flags after a delay
-      setTimeout(() => {
-        navigationInProgress.current = false;
-        setIsNavigating(false);
-        setLoadingProjectId(null);
-      }, 500);
-    }, 300);
+      // Use replace to prevent back button from returning to a potentially broken state
+      navigate(`/builder/${projectId}`, { replace: true });
+    }, 200);
   }, [navigate]);
 
   const handleCreateProject = async (name: string, description: string, template: AppTemplate) => {
@@ -125,14 +142,8 @@ export default function Dashboard() {
         // Navigate with a delay to ensure state updates
         console.log("Navigating to newly created project:", newProjectId);
         setTimeout(() => {
-          navigate(`/builder/${newProjectId}`);
-          
-          // Reset navigation flags after a delay
-          setTimeout(() => {
-            navigationInProgress.current = false;
-            setIsNavigating(false);
-            setLoadingProjectId(null);
-          }, 500);
+          // Use replace to prevent back button from returning to a potentially broken state
+          navigate(`/builder/${newProjectId}`, { replace: true });
         }, 500);
       } else {
         navigationInProgress.current = false;
@@ -197,7 +208,7 @@ export default function Dashboard() {
         />
         
         {isNavigating && (
-          <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/90 backdrop-blur-sm border-t border-border z-50">
+          <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/90 backdrop-blur-sm border-t border-border z-50 shadow-lg">
             <div className="container max-w-7xl mx-auto">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3 flex-1 mr-4">

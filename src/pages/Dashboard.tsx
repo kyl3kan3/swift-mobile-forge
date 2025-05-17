@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useProjects } from "@/hooks/useProjects";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
@@ -8,13 +8,31 @@ import PromoBanner from "@/components/dashboard/PromoBanner";
 import NewProjectDialog from "@/components/builder/NewProjectDialog";
 import { AppTemplate } from "@/types/appBuilder";
 import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 
 export default function Dashboard() {
   const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
   const navigate = useNavigate();
   const { projects, isLoading, createProject, deleteProject } = useProjects();
-  const { toast } = useToast();
+  const { toast: shadowToast } = useToast();
+
+  // Memoized navigation function to prevent multiple calls
+  const navigateToBuilder = useCallback((projectId: string) => {
+    if (isNavigating) return;
+    
+    setIsNavigating(true);
+    console.log(`Preparing to navigate to project: ${projectId}`);
+    
+    // Show loading feedback
+    toast.loading(`Opening project...`, { duration: 1500 });
+    
+    // Use setTimeout to ensure state updates and UI feedback before navigation
+    setTimeout(() => {
+      console.log(`Navigating to: /builder/${projectId}`);
+      navigate(`/builder/${projectId}`, { replace: true });
+    }, 350);
+  }, [navigate, isNavigating]);
 
   const handleCreateProject = async (name: string, description: string, template: AppTemplate) => {
     if (isNavigating) return; // Prevent multiple navigation attempts
@@ -27,15 +45,18 @@ export default function Dashboard() {
         // Close dialog first before navigation
         setIsNewProjectDialogOpen(false);
         
-        // Navigate with a longer delay to ensure state updates
+        // Show success message with Sonner toast
+        toast.success(`Project "${name}" created successfully`);
+        
+        // Navigate with a delay to ensure state updates
         console.log("Navigating to newly created project:", newProjectId);
         setTimeout(() => {
-          navigate(`/builder/${newProjectId}`);
-        }, 300);
+          navigate(`/builder/${newProjectId}`, { replace: true });
+        }, 500);
       } else {
         setIsNavigating(false);
         setIsNewProjectDialogOpen(false);
-        toast({
+        shadowToast({
           title: "Error",
           description: "Failed to create project. Please try again.",
           variant: "destructive"
@@ -45,7 +66,7 @@ export default function Dashboard() {
       console.error("Error in handleCreateProject:", error);
       setIsNavigating(false);
       setIsNewProjectDialogOpen(false);
-      toast({
+      shadowToast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive"
@@ -54,17 +75,18 @@ export default function Dashboard() {
   };
 
   const handleSelectProject = (id: string) => {
-    if (isNavigating) return; // Prevent multiple navigation attempts
-    
-    // Set navigating state to prevent multiple clicks
-    setIsNavigating(true);
-    console.log("Opening project:", id);
-    
-    // Navigate with a longer delay
-    setTimeout(() => {
-      console.log("Navigating to:", `/builder/${id}`);
-      navigate(`/builder/${id}`);
-    }, 300);
+    console.log("Project selected:", id);
+    navigateToBuilder(id);
+  };
+
+  const handleDeleteProject = async (id: string) => {
+    try {
+      await deleteProject(id);
+      toast.success("Project deleted successfully");
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      toast.error("Failed to delete project");
+    }
   };
 
   return (
@@ -76,7 +98,7 @@ export default function Dashboard() {
           projects={projects}
           isLoading={isLoading}
           onSelectProject={handleSelectProject}
-          onDeleteProject={deleteProject}
+          onDeleteProject={handleDeleteProject}
           onNewProject={() => setIsNewProjectDialogOpen(true)}
         />
         

@@ -2,7 +2,7 @@
 import { AppProject } from "@/types/appBuilder";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { LucideIcon, MessageSquare, MoreVertical, Trash2, CalendarDays, Calendar } from "lucide-react";
+import { MessageSquare, MoreVertical, Trash2, CalendarDays, Calendar } from "lucide-react";
 import { useState } from "react";
 import { 
   DropdownMenu,
@@ -30,12 +30,19 @@ export default function ProjectCard({ project, onSelect, onDelete }: ProjectCard
     });
   };
 
-  // A single handler with event stopping to prevent multiple events
-  const handleSelect = (e: React.MouseEvent) => {
+  // Simplified handling with clear event prevention
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Only handle card clicks that aren't from dropdown
+    if (!(e.target as Element).closest('.dropdown-trigger')) {
+      console.log("Project card clicked:", project.id);
+      onSelect(project.id);
+    }
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log("Project selected:", project.id);
-    onSelect(project.id);
+    onDelete(project.id);
   };
 
   return (
@@ -45,23 +52,25 @@ export default function ProjectCard({ project, onSelect, onDelete }: ProjectCard
       } group backdrop-blur-sm bg-card/90 cursor-pointer`}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
-      onClick={handleSelect}
+      onClick={handleCardClick}
     >
       <div className="h-1.5 bg-gradient-to-r from-primary via-builder-accent-purple to-builder-accent-green"></div>
       <CardHeader className="relative pb-3">
         <div className="flex justify-between items-start">
           <CardTitle className="text-xl font-bold tracking-tight">{project.name}</CardTitle>
           <DropdownMenu>
-            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8 dropdown-trigger"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="shadow-xl bg-card/95 backdrop-blur-sm border-primary/5">
-              <DropdownMenuItem onClick={(e) => {
-                e.stopPropagation();
-                onDelete(project.id);
-              }} className="text-destructive cursor-pointer">
+              <DropdownMenuItem onClick={handleDeleteClick} className="text-destructive cursor-pointer">
                 <Trash2 className="mr-2 h-4 w-4" />
                 Delete
               </DropdownMenuItem>
@@ -94,7 +103,10 @@ export default function ProjectCard({ project, onSelect, onDelete }: ProjectCard
       </CardContent>
       <CardFooter className="pt-3 pb-5">
         <Button 
-          onClick={handleSelect}
+          onClick={(e) => {
+            e.stopPropagation(); // Prevent double event firing
+            onSelect(project.id);
+          }}
           className="w-full bg-gradient-to-r from-builder-blue-600 to-builder-blue-700 hover:from-builder-blue-700 hover:to-builder-blue-800 border-none transition-all duration-500 shadow-md group-hover:shadow-lg py-6"
         >
           Open Project

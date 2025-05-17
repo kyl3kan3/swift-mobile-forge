@@ -10,7 +10,7 @@ import TemplateGallery from "./pages/TemplateGallery";
 import AppBuilder from "./pages/AppBuilder";
 import NotFound from "./pages/NotFound";
 
-// Configure QueryClient with default options
+// Configure QueryClient with optimized options
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -26,7 +26,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
-      <Sonner position="bottom-right" />
+      <Sonner position="bottom-right" closeButton />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />

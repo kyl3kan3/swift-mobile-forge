@@ -4,11 +4,28 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Suspense, lazy } from "react";
+import ErrorBoundary from "@/components/common/ErrorBoundary";
+import RequireAuth from "@/components/common/RequireAuth";
+
+// Load the Index page eagerly as it's the first one users see
 import Index from "./pages/Index";
-import Dashboard from "./pages/Dashboard";
-import TemplateGallery from "./pages/TemplateGallery";
-import AppBuilder from "./pages/AppBuilder";
-import NotFound from "./pages/NotFound";
+
+// Lazy load other pages for better performance
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const TemplateGallery = lazy(() => import("./pages/TemplateGallery"));
+const AppBuilder = lazy(() => import("./pages/AppBuilder"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+
+// Loading component for Suspense fallback
+const LoadingPage = () => (
+  <div className="flex h-screen w-full items-center justify-center bg-background">
+    <div className="flex flex-col items-center gap-4">
+      <div className="animate-spin rounded-full h-10 w-10 border-2 border-primary border-r-transparent"></div>
+      <p className="text-muted-foreground">Loading...</p>
+    </div>
+  </div>
+);
 
 // Configure QueryClient with optimized options
 const queryClient = new QueryClient({
@@ -25,18 +42,22 @@ const queryClient = new QueryClient({
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
+      {/* Using just one toast provider to avoid duplication */}
       <Sonner position="bottom-right" closeButton richColors />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/templates" element={<TemplateGallery />} />
-          <Route path="/templates/:projectId" element={<TemplateGallery />} />
-          <Route path="/builder/:projectId" element={<AppBuilder />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <ErrorBoundary>
+        <BrowserRouter>
+          <Suspense fallback={<LoadingPage />}>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
+              <Route path="/templates" element={<RequireAuth><TemplateGallery /></RequireAuth>} />
+              <Route path="/templates/:projectId" element={<RequireAuth><TemplateGallery /></RequireAuth>} />
+              <Route path="/builder/:projectId" element={<RequireAuth><AppBuilder /></RequireAuth>} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
+      </ErrorBoundary>
     </TooltipProvider>
   </QueryClientProvider>
 );

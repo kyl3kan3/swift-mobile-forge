@@ -16,7 +16,7 @@ import { useProjectActions } from "@/hooks/useProjectActions";
 
 export default function Dashboard() {
   // Define all state hooks first
-  const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
+  const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
   
   // Initialize navigation state
   const {
@@ -50,7 +50,7 @@ export default function Dashboard() {
   return (
     <DashboardLayout>
       <div className="flex flex-col gap-6">
-        <DashboardHeader onNewProject={() => setIsNewProjectDialogOpen(true)} />
+        <DashboardHeader onNewProject={() => setShowNewProjectDialog(true)} />
         <Separator className="bg-accent/50" />
         
         <ProjectsSection 
@@ -58,7 +58,7 @@ export default function Dashboard() {
           isLoading={isLoading}
           onSelectProject={handleSelectProject}
           onDeleteProject={handleDeleteProject}
-          onNewProject={() => setIsNewProjectDialogOpen(true)}
+          onNewProject={() => setShowNewProjectDialog(true)}
           loadingProjectId={loadingProjectId}
         />
         
@@ -67,8 +67,8 @@ export default function Dashboard() {
 
       {/* Project creation dialog */}
       <NewProjectDialog
-        isOpen={isNewProjectDialogOpen}
-        onClose={() => setIsNewProjectDialogOpen(false)}
+        isOpen={showNewProjectDialog}
+        onClose={() => setShowNewProjectDialog(false)}
         onCreateProject={handleCreateProject}
       />
       

@@ -35,15 +35,27 @@ export default function LoadingIndicator({
   if (!isVisible) return null;
   
   return (
-    <div className="fixed inset-0 z-[9999] bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center">
+    <div 
+      className="fixed inset-0 z-[9999] bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center"
+      role="dialog"
+      aria-label="Loading indicator"
+      aria-modal="true"
+    >
       <div className="container max-w-md mx-auto p-6 bg-background rounded-lg shadow-2xl border border-border">
         <div className="flex flex-col items-center gap-4">
           <div className="flex items-center gap-3 w-full">
-            <div className="animate-spin rounded-full h-6 w-6 border-2 border-primary border-r-transparent"></div>
+            <div 
+              className="animate-spin rounded-full h-6 w-6 border-2 border-primary border-r-transparent"
+              aria-hidden="true"
+            ></div>
             <p className="text-base font-medium">{message}</p>
           </div>
           
-          <Progress value={progressValue} className="w-full h-2" />
+          <Progress 
+            value={progressValue} 
+            className="w-full h-2"
+            aria-label={`Loading progress: ${Math.round(progressValue)}%`}
+          />
           
           <div className="text-sm text-muted-foreground text-center">
             <p>This may take a moment...</p>

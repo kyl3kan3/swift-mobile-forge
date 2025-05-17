@@ -21,20 +21,23 @@ export function useNavigationState() {
       navigationInProgress.current = false;
     };
 
-    // Reset on mount
-    resetNavigationState();
+    // Reset on mount only if we're actually on the dashboard
+    // This prevents resetting during navigation
+    if (location.pathname === '/dashboard') {
+      resetNavigationState();
+    }
 
     return () => {
-      // Clean up any pending navigation states when component unmounts
-      resetNavigationState();
+      // Do not reset when leaving dashboard - we need to maintain state during navigation
+      // We only reset if we detect being back at dashboard while navigating
     };
-  }, []);
+  }, [location.pathname]);
   
   // Only detect if we're going back to dashboard from another route
   useEffect(() => {
     // Only reset if we're going BACK to dashboard after attempting navigation
-    // Don't reset when first navigating to the builder
-    if (location.pathname === '/dashboard' && isNavigating && !location.pathname.includes('builder')) {
+    // Don't reset when first landing on dashboard or when navigation is still in progress
+    if (location.pathname === '/dashboard' && isNavigating && navigationInProgress.current) {
       console.log('Back to dashboard after navigation attempt, resetting navigation state');
       setIsNavigating(false);
       setLoadingProjectId(null);
@@ -108,8 +111,8 @@ export function useNavigationState() {
     // Use a shorter delay for more responsive navigation
     setTimeout(() => {
       console.log(`Navigating to: /builder/${projectId}`);
-      // Use replace to prevent back button from returning to a potentially broken state
-      navigate(`/builder/${projectId}`, { replace: false });
+      // Don't use replace here - using normal navigation with history
+      navigate(`/builder/${projectId}`);
     }, 200);
   };
 

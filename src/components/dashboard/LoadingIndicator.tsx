@@ -8,13 +8,14 @@ interface LoadingIndicatorProps {
 
 export default function LoadingIndicator({ isNavigating, progressValue }: LoadingIndicatorProps) {
   useEffect(() => {
-    // When progress reaches 100%, we want to keep the indicator visible
+    // When progress reaches 100%, we want to ensure the loading indicator stays visible
+    // until the actual navigation completes
     if (progressValue === 100) {
-      // This is a visual cue that we're actually navigating
       console.log("Navigation in progress, showing full progress bar");
     }
   }, [progressValue]);
 
+  // We need to keep the loading indicator visible even when navigation is happening
   if (!isNavigating) return null;
   
   return (

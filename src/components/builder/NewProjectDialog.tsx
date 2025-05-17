@@ -20,6 +20,8 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { AppTemplate } from "@/types/appBuilder";
+import { useForm } from "react-hook-form";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 
 interface NewProjectDialogProps {
   isOpen: boolean;
@@ -27,27 +29,53 @@ interface NewProjectDialogProps {
   onCreateProject: (name: string, description: string, template: AppTemplate) => void;
 }
 
+interface ProjectFormValues {
+  name: string;
+  description: string;
+  template: AppTemplate;
+}
+
 export default function NewProjectDialog({ 
   isOpen, 
   onClose, 
   onCreateProject 
 }: NewProjectDialogProps) {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [template, setTemplate] = useState<AppTemplate>("blank");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const form = useForm<ProjectFormValues>({
+    defaultValues: {
+      name: "",
+      description: "",
+      template: "blank" as AppTemplate
+    }
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (name.trim()) {
-      onCreateProject(name, description, template);
-      setName("");
-      setDescription("");
-      setTemplate("blank");
+  const handleSubmit = (values: ProjectFormValues) => {
+    if (!values.name.trim()) return;
+    
+    setIsSubmitting(true);
+    
+    try {
+      onCreateProject(values.name.trim(), values.description.trim(), values.template);
+      form.reset({
+        name: "",
+        description: "",
+        template: "blank"
+      });
+    } catch (error) {
+      console.error("Error creating project:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      if (!open) {
+        onClose();
+        form.reset();
+      }
+    }}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Create New Project</DialogTitle>
@@ -56,57 +84,93 @@ export default function NewProjectDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Project Name</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="My Awesome App"
-              required
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem className="space-y-2">
+                  <FormLabel>Project Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="My Awesome App"
+                      {...field}
+                      required
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Description (optional)</Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="A brief description of your app"
-              rows={3}
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem className="space-y-2">
+                  <FormLabel>Description (optional)</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="A brief description of your app"
+                      rows={3}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="template">Template</Label>
-            <Select 
-              value={template} 
-              onValueChange={(value) => setTemplate(value as AppTemplate)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a template" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="blank">Blank App</SelectItem>
-                <SelectItem value="ecommerce">E-Commerce</SelectItem>
-                <SelectItem value="social">Social Network</SelectItem>
-                <SelectItem value="blog">Blog/News</SelectItem>
-                <SelectItem value="business">Business</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+            <FormField
+              control={form.control}
+              name="template"
+              render={({ field }) => (
+                <FormItem className="space-y-2">
+                  <FormLabel>Template</FormLabel>
+                  <Select 
+                    onValueChange={field.onChange} 
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a template" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="blank">Blank App</SelectItem>
+                      <SelectItem value="ecommerce">E-Commerce</SelectItem>
+                      <SelectItem value="social">Social Network</SelectItem>
+                      <SelectItem value="blog">Blog/News</SelectItem>
+                      <SelectItem value="business">Business</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={!name.trim()}>
-              Create Project
-            </Button>
-          </DialogFooter>
-        </form>
+            <DialogFooter>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => {
+                  onClose();
+                  form.reset();
+                }}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={!form.getValues().name.trim() || isSubmitting}
+              >
+                {isSubmitting ? "Creating..." : "Create Project"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

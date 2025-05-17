@@ -8,28 +8,27 @@ interface LoadingIndicatorProps {
 }
 
 export default function LoadingIndicator({ isNavigating, progressValue }: LoadingIndicatorProps) {
-  // Add local state to prevent premature unmounting
+  // Local state for visibility control
   const [isVisible, setIsVisible] = useState(false);
   
   useEffect(() => {
+    // Show immediately when navigation starts
     if (isNavigating) {
       setIsVisible(true);
       console.log("Navigation started, showing loading indicator");
     }
     
-    // Only hide the indicator if navigation is complete AND we were previously navigating
+    // Delay hiding when navigation completes
     if (!isNavigating && isVisible) {
-      // Add a delay before hiding to ensure the navigation completes
       const timer = setTimeout(() => {
         setIsVisible(false);
         console.log("Navigation complete, hiding loading indicator");
-      }, 15000); // 15 second delay (increased further)
+      }, 2000); // Just 2 seconds delay - we'll keep it visible while navigating
       
       return () => clearTimeout(timer);
     }
   }, [isNavigating, isVisible]);
   
-  // Use local state for visibility instead of prop
   if (!isVisible) return null;
   
   return (
@@ -39,11 +38,16 @@ export default function LoadingIndicator({ isNavigating, progressValue }: Loadin
           <div className="flex items-center gap-3 w-full">
             <div className="animate-spin rounded-full h-6 w-6 border-2 border-primary border-r-transparent"></div>
             <p className="text-base font-medium">
-              {progressValue < 100 ? "Opening project..." : "Navigating to project..."}
+              {progressValue < 100 ? "Opening project..." : "Navigating to builder..."}
             </p>
           </div>
+          
           <Progress value={progressValue} className="w-full h-2" />
-          <p className="text-sm text-muted-foreground">Please wait while we load your project...</p>
+          
+          <div className="text-sm text-muted-foreground text-center">
+            <p className="mb-1">We're preparing your project environment.</p>
+            <p>This may take a few moments...</p>
+          </div>
         </div>
       </div>
     </div>

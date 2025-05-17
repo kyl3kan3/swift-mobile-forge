@@ -1,19 +1,25 @@
 
 import { useState, useEffect } from "react";
+import { Separator } from "@/components/ui/separator";
+import { toast } from "sonner";
+
+// Import components
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import ProjectsSection from "@/components/dashboard/ProjectsSection";
 import PromoBanner from "@/components/dashboard/PromoBanner";
 import NewProjectDialog from "@/components/builder/NewProjectDialog";
 import LoadingIndicator from "@/components/dashboard/LoadingIndicator";
+import DashboardLayout from "@/components/dashboard/DashboardLayout";
+
+// Import hooks
 import { useNavigationState } from "@/hooks/useNavigationState";
 import { useProjectActions } from "@/hooks/useProjectActions";
-import DashboardLayout from "@/components/dashboard/DashboardLayout";
-import { Separator } from "@/components/ui/separator";
 
 export default function Dashboard() {
-  // Fix hook order issues by ensuring consistent hook ordering
+  // State for dialogs
   const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
   
+  // Initialize navigation state
   const {
     isNavigating,
     loadingProjectId,
@@ -24,6 +30,7 @@ export default function Dashboard() {
     navigateToBuilder
   } = useNavigationState();
   
+  // Initialize project data and actions
   const {
     projects,
     isLoading,
@@ -37,10 +44,10 @@ export default function Dashboard() {
     navigationInProgress
   });
   
+  // Log when dashboard mounts
   useEffect(() => {
-    // Log when dashboard mounts
-    console.log("Dashboard mounted");
-  }, []);
+    console.log("Dashboard mounted, projects count:", projects.length);
+  }, [projects]);
 
   return (
     <DashboardLayout>
@@ -60,14 +67,18 @@ export default function Dashboard() {
         <PromoBanner />
       </div>
 
+      {/* Project creation dialog */}
       <NewProjectDialog
         isOpen={isNewProjectDialogOpen}
         onClose={() => setIsNewProjectDialogOpen(false)}
         onCreateProject={handleCreateProject}
       />
       
-      {/* Always render LoadingIndicator and let it handle its own visibility */}
-      <LoadingIndicator isNavigating={isNavigating} progressValue={progressValue} />
+      {/* Loading overlay with its own visibility control */}
+      <LoadingIndicator 
+        isNavigating={isNavigating} 
+        progressValue={progressValue} 
+      />
     </DashboardLayout>
   );
 }

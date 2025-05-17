@@ -21,6 +21,7 @@ export function useProjectActions({
   const { projects, isLoading, createProject, deleteProject } = useProjects();
   const { toast: shadowToast } = useToast();
   
+  // Handle project creation
   const handleCreateProject = useCallback(async (name: string, description: string, template: AppTemplate) => {
     if (navigationInProgress.current) {
       console.log("Navigation in progress, ignoring create project request");
@@ -30,41 +31,34 @@ export function useProjectActions({
     try {
       // Set loading state first
       setIsNavigating(true);
-      setLoadingProjectId("");  // Temporary value
+      setLoadingProjectId("creating");
       
+      // Create the project
       const newProjectId = await createProject(name, description, template);
       
       if (newProjectId) {
-        // Show success message with Sonner toast
+        // Show success toast
         toast.success(`Project "${name}" created successfully`);
-        
-        // Set loading project ID
-        setLoadingProjectId(newProjectId);
         
         // Navigate to the new project
         console.log("Navigating to newly created project:", newProjectId);
+        setLoadingProjectId(newProjectId);
         navigateToBuilder(newProjectId);
       } else {
+        // Handle creation failure
         setIsNavigating(false);
         setLoadingProjectId(null);
-        shadowToast({
-          title: "Error",
-          description: "Failed to create project. Please try again.",
-          variant: "destructive"
-        });
+        toast.error("Failed to create project. Please try again.");
       }
     } catch (error) {
       console.error("Error in handleCreateProject:", error);
       setIsNavigating(false);
       setLoadingProjectId(null);
-      shadowToast({
-        title: "Error",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive"
-      });
+      toast.error("An error occurred while creating your project.");
     }
   }, [createProject, navigateToBuilder, navigationInProgress, setIsNavigating, setLoadingProjectId, shadowToast]);
 
+  // Handle project selection
   const handleSelectProject = useCallback((id: string) => {
     if (navigationInProgress.current) {
       console.log("Navigation in progress, ignoring project selection");
@@ -75,6 +69,7 @@ export function useProjectActions({
     navigateToBuilder(id);
   }, [navigateToBuilder, navigationInProgress]);
 
+  // Handle project deletion
   const handleDeleteProject = useCallback(async (id: string) => {
     try {
       await deleteProject(id);

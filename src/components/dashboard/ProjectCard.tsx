@@ -2,7 +2,7 @@
 import { AppProject } from "@/types/appBuilder";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { LucideIcon, MessageSquare, MoreVertical, Smartphone, Trash2, CalendarDays, Calendar } from "lucide-react";
+import { LucideIcon, MessageSquare, MoreVertical, Trash2, CalendarDays, Calendar } from "lucide-react";
 import { useState } from "react";
 import { 
   DropdownMenu,
@@ -30,14 +30,18 @@ export default function ProjectCard({ project, onSelect, onDelete }: ProjectCard
     });
   };
 
+  const handleCardClick = () => {
+    onSelect(project.id);
+  };
+
   return (
     <Card 
       className={`overflow-hidden border-none transition-all duration-500 ${
         isHovering ? 'shadow-2xl translate-y-[-8px]' : 'shadow-lg'
-      } group backdrop-blur-sm bg-card/90`}
+      } group backdrop-blur-sm bg-card/90 cursor-pointer`}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
-      onClick={() => onSelect(project.id)}
+      onClick={handleCardClick}
     >
       <div className="h-1.5 bg-gradient-to-r from-primary via-builder-accent-purple to-builder-accent-green"></div>
       <CardHeader className="relative pb-3">
@@ -87,8 +91,8 @@ export default function ProjectCard({ project, onSelect, onDelete }: ProjectCard
       <CardFooter className="pt-3 pb-5">
         <Button 
           onClick={(e) => {
-            e.stopPropagation();
-            onSelect(project.id);
+            e.preventDefault(); // Prevent card click from triggering twice
+            handleCardClick();
           }} 
           className="w-full bg-gradient-to-r from-builder-blue-600 to-builder-blue-700 hover:from-builder-blue-700 hover:to-builder-blue-800 border-none transition-all duration-500 shadow-md group-hover:shadow-lg py-6"
         >

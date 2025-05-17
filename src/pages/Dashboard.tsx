@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useProjects } from "@/hooks/useProjects";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
@@ -13,32 +13,44 @@ import { toast } from "sonner";
 export default function Dashboard() {
   const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
+  const navigationInProgress = useRef(false);
   const navigate = useNavigate();
   const { projects, isLoading, createProject, deleteProject } = useProjects();
   const { toast: shadowToast } = useToast();
 
-  // Memoized navigation function to prevent multiple calls
+  // Stable navigation function to prevent multiple calls or race conditions
   const navigateToBuilder = useCallback((projectId: string) => {
-    if (isNavigating) return;
+    if (navigationInProgress.current) {
+      console.log("Navigation already in progress, ignoring additional request");
+      return;
+    }
     
+    navigationInProgress.current = true;
     setIsNavigating(true);
     console.log(`Preparing to navigate to project: ${projectId}`);
     
     // Show loading feedback
     toast.loading(`Opening project...`, { duration: 1500 });
     
-    // Use setTimeout to ensure state updates and UI feedback before navigation
+    // Use setTimeout with a slightly longer delay to ensure state updates
     setTimeout(() => {
       console.log(`Navigating to: /builder/${projectId}`);
-      navigate(`/builder/${projectId}`, { replace: true });
-    }, 350);
-  }, [navigate, isNavigating]);
+      navigate(`/builder/${projectId}`);
+      
+      // Reset navigation flags after a delay
+      setTimeout(() => {
+        navigationInProgress.current = false;
+        setIsNavigating(false);
+      }, 500);
+    }, 300);
+  }, [navigate]);
 
   const handleCreateProject = async (name: string, description: string, template: AppTemplate) => {
-    if (isNavigating) return; // Prevent multiple navigation attempts
+    if (navigationInProgress.current) return;
     
     try {
       setIsNavigating(true);
+      navigationInProgress.current = true;
       const newProjectId = await createProject(name, description, template);
       
       if (newProjectId) {
@@ -51,9 +63,10 @@ export default function Dashboard() {
         // Navigate with a delay to ensure state updates
         console.log("Navigating to newly created project:", newProjectId);
         setTimeout(() => {
-          navigate(`/builder/${newProjectId}`, { replace: true });
+          navigate(`/builder/${newProjectId}`);
         }, 500);
       } else {
+        navigationInProgress.current = false;
         setIsNavigating(false);
         setIsNewProjectDialogOpen(false);
         shadowToast({
@@ -64,6 +77,7 @@ export default function Dashboard() {
       }
     } catch (error) {
       console.error("Error in handleCreateProject:", error);
+      navigationInProgress.current = false;
       setIsNavigating(false);
       setIsNewProjectDialogOpen(false);
       shadowToast({

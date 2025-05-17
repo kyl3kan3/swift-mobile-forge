@@ -30,19 +30,29 @@ export default function ProjectCard({ project, onSelect, onDelete }: ProjectCard
     });
   };
 
-  // Simplified handling with clear event prevention
+  // Simplified click handler that properly checks if click is from dropdown
   const handleCardClick = (e: React.MouseEvent) => {
-    // Only handle card clicks that aren't from dropdown
-    if (!(e.target as Element).closest('.dropdown-trigger')) {
-      console.log("Project card clicked:", project.id);
-      onSelect(project.id);
+    const target = e.target as HTMLElement;
+    // Don't handle card clicks from dropdown or button
+    if (target.closest('.dropdown-trigger') || target.closest('.card-button')) {
+      return;
     }
+    
+    console.log("Project card clicked:", project.id);
+    onSelect(project.id);
   };
 
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     onDelete(project.id);
+  };
+
+  // Dedicated handler for the button to prevent event bubbling
+  const handleButtonClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onSelect(project.id);
   };
 
   return (
@@ -103,11 +113,8 @@ export default function ProjectCard({ project, onSelect, onDelete }: ProjectCard
       </CardContent>
       <CardFooter className="pt-3 pb-5">
         <Button 
-          onClick={(e) => {
-            e.stopPropagation(); // Prevent double event firing
-            onSelect(project.id);
-          }}
-          className="w-full bg-gradient-to-r from-builder-blue-600 to-builder-blue-700 hover:from-builder-blue-700 hover:to-builder-blue-800 border-none transition-all duration-500 shadow-md group-hover:shadow-lg py-6"
+          onClick={handleButtonClick}
+          className="card-button w-full bg-gradient-to-r from-builder-blue-600 to-builder-blue-700 hover:from-builder-blue-700 hover:to-builder-blue-800 border-none transition-all duration-500 shadow-md group-hover:shadow-lg py-6"
         >
           Open Project
         </Button>

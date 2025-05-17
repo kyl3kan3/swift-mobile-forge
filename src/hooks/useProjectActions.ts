@@ -25,9 +25,10 @@ export function useProjectActions({
     if (navigationInProgress.current) return;
     
     try {
+      // Set loading state first
       setIsNavigating(true);
-      // Instead of directly modifying the ref, we use the setter
-      setLoadingProjectId("");  // Set a temporary non-null value to indicate navigation started
+      setLoadingProjectId("");  // Temporary value
+      
       const newProjectId = await createProject(name, description, template);
       
       if (newProjectId) {
@@ -37,11 +38,10 @@ export function useProjectActions({
         // Set loading project ID
         setLoadingProjectId(newProjectId);
         
-        // Navigate with a delay to ensure state updates
+        // Navigate to the new project
         console.log("Navigating to newly created project:", newProjectId);
         navigateToBuilder(newProjectId);
       } else {
-        // Use the setter functions instead of modifying ref directly
         setIsNavigating(false);
         setLoadingProjectId(null);
         shadowToast({
@@ -52,7 +52,6 @@ export function useProjectActions({
       }
     } catch (error) {
       console.error("Error in handleCreateProject:", error);
-      // Use the setter functions instead of modifying ref directly
       setIsNavigating(false);
       setLoadingProjectId(null);
       shadowToast({

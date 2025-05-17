@@ -18,13 +18,12 @@ export default function LoadingIndicator({ isNavigating, progressValue }: Loadin
     }
     
     // Only hide the indicator if navigation is complete AND we were previously navigating
-    // This prevents the indicator from disappearing too soon
     if (!isNavigating && isVisible) {
-      // Add a longer delay before hiding to ensure the navigation completes
+      // Add a delay before hiding to ensure the navigation completes
       const timer = setTimeout(() => {
         setIsVisible(false);
         console.log("Navigation complete, hiding loading indicator");
-      }, 8000); // 8 second delay for more reliable navigation
+      }, 5000); // 5 second delay
       
       return () => clearTimeout(timer);
     }

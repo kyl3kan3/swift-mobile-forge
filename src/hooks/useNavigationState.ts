@@ -1,6 +1,6 @@
 
 import { useState, useRef, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 export function useNavigationState() {
@@ -13,10 +13,10 @@ export function useNavigationState() {
   const navigationInProgress = useRef(false);
   const navigationStartTime = useRef<number | null>(null);
   const navigationAttempts = useRef(0);
-  const maxAttempts = useRef(3);
   
   // Then other hooks
   const location = useLocation();
+  const navigate = useNavigate();
   
   // Reset navigation state only when first arriving at dashboard
   useEffect(() => {
@@ -82,7 +82,7 @@ export function useNavigationState() {
     };
   }, [isNavigating, location.pathname]);
 
-  // Completely revised navigation function to be more reliable
+  // New two-phase navigation approach
   const navigateToBuilder = (projectId: string) => {
     if (navigationInProgress.current) {
       console.log("Navigation already in progress, ignoring additional request");
@@ -96,24 +96,16 @@ export function useNavigationState() {
     setLoadingProjectId(projectId);
     navigationInProgress.current = true;
     navigationStartTime.current = Date.now();
-    navigationAttempts.current = 0;
     
-    // Complete the progress immediately
+    // Complete the progress animation
     setProgressValue(100);
     
-    // Force full page navigation - this is more reliable than React Router for complex state transitions
-    try {
-      // Add a cache-busting parameter to prevent browser caching
-      const timestamp = new Date().getTime();
-      const url = `/builder/${projectId}?t=${timestamp}`;
-      
-      console.log(`Navigating to: ${url}`);
-      window.location.replace(url);
-    } catch (error) {
-      console.error("Navigation error:", error);
-      // Fallback to href as a last resort
-      window.location.href = `/builder/${projectId}`;
-    }
+    // First phase: show the loading indicator
+    setTimeout(() => {
+      // Second phase: navigate using React Router
+      console.log(`Navigating to project: ${projectId}`);
+      navigate(`/builder/${projectId}`);
+    }, 500); // Small delay to ensure loading indicator shows first
   };
 
   return {

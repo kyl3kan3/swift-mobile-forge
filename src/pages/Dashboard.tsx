@@ -11,23 +11,29 @@ import { useToast } from "@/components/ui/use-toast";
 
 export default function Dashboard() {
   const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
   const navigate = useNavigate();
   const { projects, isLoading, createProject, deleteProject } = useProjects();
   const { toast } = useToast();
 
   const handleCreateProject = async (name: string, description: string, template: AppTemplate) => {
+    if (isNavigating) return; // Prevent multiple navigation attempts
+    
     try {
+      setIsNavigating(true);
       const newProjectId = await createProject(name, description, template);
+      
       if (newProjectId) {
         // Close dialog first before navigation
         setIsNewProjectDialogOpen(false);
         
-        // Ensure the state is updated before navigating
+        // Navigate with a longer delay to ensure state updates
+        console.log("Navigating to newly created project:", newProjectId);
         setTimeout(() => {
-          console.log("Navigating to newly created project:", newProjectId);
           navigate(`/builder/${newProjectId}`);
-        }, 100);
+        }, 300);
       } else {
+        setIsNavigating(false);
         setIsNewProjectDialogOpen(false);
         toast({
           title: "Error",
@@ -37,6 +43,7 @@ export default function Dashboard() {
       }
     } catch (error) {
       console.error("Error in handleCreateProject:", error);
+      setIsNavigating(false);
       setIsNewProjectDialogOpen(false);
       toast({
         title: "Error",
@@ -47,14 +54,17 @@ export default function Dashboard() {
   };
 
   const handleSelectProject = (id: string) => {
-    // Log and use a small timeout to ensure UI state is settled before navigation
+    if (isNavigating) return; // Prevent multiple navigation attempts
+    
+    // Set navigating state to prevent multiple clicks
+    setIsNavigating(true);
     console.log("Opening project:", id);
     
-    // Add a small delay to ensure state updates before navigation
+    // Navigate with a longer delay
     setTimeout(() => {
       console.log("Navigating to:", `/builder/${id}`);
       navigate(`/builder/${id}`);
-    }, 100);
+    }, 300);
   };
 
   return (

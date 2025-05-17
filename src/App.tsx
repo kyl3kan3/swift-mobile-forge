@@ -13,6 +13,7 @@ import Index from "./pages/Index";
 
 // Lazy load other pages for better performance
 const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Projects = lazy(() => import("./pages/Projects"));
 const TemplateGallery = lazy(() => import("./pages/TemplateGallery"));
 const AppBuilder = lazy(() => import("./pages/AppBuilder"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -50,6 +51,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
+              <Route path="/projects" element={<RequireAuth><Projects /></RequireAuth>} />
               <Route path="/templates" element={<RequireAuth><TemplateGallery /></RequireAuth>} />
               <Route path="/templates/:projectId" element={<RequireAuth><TemplateGallery /></RequireAuth>} />
               <Route path="/builder/:projectId" element={<RequireAuth><AppBuilder /></RequireAuth>} />

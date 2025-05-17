@@ -30,7 +30,12 @@ export default function ProjectCard({ project, onSelect, onDelete }: ProjectCard
     });
   };
 
-  const handleCardClick = () => {
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Ensure the event hasn't been stopped by child elements
+    if (e.defaultPrevented) return;
+    
+    // Navigate to the project
+    console.log("Opening project:", project.id, project.name);
     onSelect(project.id);
   };
 
@@ -91,8 +96,10 @@ export default function ProjectCard({ project, onSelect, onDelete }: ProjectCard
       <CardFooter className="pt-3 pb-5">
         <Button 
           onClick={(e) => {
-            e.preventDefault(); // Prevent card click from triggering twice
-            handleCardClick();
+            // Stop propagation then trigger the card click handler explicitly
+            e.stopPropagation();
+            console.log("Button clicked for project:", project.id);
+            onSelect(project.id);
           }} 
           className="w-full bg-gradient-to-r from-builder-blue-600 to-builder-blue-700 hover:from-builder-blue-700 hover:to-builder-blue-800 border-none transition-all duration-500 shadow-md group-hover:shadow-lg py-6"
         >

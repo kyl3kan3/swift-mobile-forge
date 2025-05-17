@@ -1,3 +1,4 @@
+
 import { Progress } from "@/components/ui/progress";
 import { useEffect, useState } from "react";
 
@@ -23,7 +24,7 @@ export default function LoadingIndicator({ isNavigating, progressValue }: Loadin
       const timer = setTimeout(() => {
         setIsVisible(false);
         console.log("Navigation complete, hiding loading indicator");
-      }, 5000); // 5 second delay for more reliable navigation
+      }, 8000); // 8 second delay for more reliable navigation
       
       return () => clearTimeout(timer);
     }
@@ -33,7 +34,7 @@ export default function LoadingIndicator({ isNavigating, progressValue }: Loadin
   if (!isVisible) return null;
   
   return (
-    <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center">
+    <div className="fixed inset-0 z-[9999] bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center">
       <div className="container max-w-md mx-auto p-6 bg-background rounded-lg shadow-2xl border border-border">
         <div className="flex flex-col items-center gap-4">
           <div className="flex items-center gap-3 w-full">

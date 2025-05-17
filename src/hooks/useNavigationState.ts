@@ -82,7 +82,7 @@ export function useNavigationState() {
     };
   }, [isNavigating, location.pathname]);
 
-  // More reliable navigation function with retries
+  // Completely revised navigation function to be more reliable
   const navigateToBuilder = (projectId: string) => {
     if (navigationInProgress.current) {
       console.log("Navigation already in progress, ignoring additional request");
@@ -101,26 +101,19 @@ export function useNavigationState() {
     // Complete the progress immediately
     setProgressValue(100);
     
-    // Attempt navigation with retries
-    const attemptNavigation = () => {
-      if (navigationAttempts.current >= maxAttempts.current) {
-        console.log("Max navigation attempts reached");
-        setTimeout(() => {
-          // Force redirect as last resort
-          window.location.href = `/builder/${projectId}`;
-        }, 500);
-        return;
-      }
+    // Force full page navigation - this is more reliable than React Router for complex state transitions
+    try {
+      // Add a cache-busting parameter to prevent browser caching
+      const timestamp = new Date().getTime();
+      const url = `/builder/${projectId}?t=${timestamp}`;
       
-      navigationAttempts.current += 1;
-      console.log(`Navigation attempt ${navigationAttempts.current}`);
-      
-      // Use window.location.href for most reliable navigation
+      console.log(`Navigating to: ${url}`);
+      window.location.replace(url);
+    } catch (error) {
+      console.error("Navigation error:", error);
+      // Fallback to href as a last resort
       window.location.href = `/builder/${projectId}`;
-    };
-    
-    // Start navigation with a slight delay
-    setTimeout(attemptNavigation, 300);
+    }
   };
 
   return {

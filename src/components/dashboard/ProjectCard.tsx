@@ -30,12 +30,10 @@ export default function ProjectCard({ project, onSelect, onDelete }: ProjectCard
     });
   };
 
-  const handleCardClick = (e: React.MouseEvent) => {
-    // Ensure the event hasn't been stopped by child elements
-    if (e.defaultPrevented) return;
-    
-    // Navigate to the project
-    console.log("Opening project:", project.id, project.name);
+  const handleSelect = (e: React.MouseEvent) => {
+    // Stop event propagation to prevent double triggering
+    e.stopPropagation();
+    // Select the project
     onSelect(project.id);
   };
 
@@ -46,7 +44,7 @@ export default function ProjectCard({ project, onSelect, onDelete }: ProjectCard
       } group backdrop-blur-sm bg-card/90 cursor-pointer`}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
-      onClick={handleCardClick}
+      onClick={handleSelect}
     >
       <div className="h-1.5 bg-gradient-to-r from-primary via-builder-accent-purple to-builder-accent-green"></div>
       <CardHeader className="relative pb-3">
@@ -95,12 +93,7 @@ export default function ProjectCard({ project, onSelect, onDelete }: ProjectCard
       </CardContent>
       <CardFooter className="pt-3 pb-5">
         <Button 
-          onClick={(e) => {
-            // Stop propagation then trigger the card click handler explicitly
-            e.stopPropagation();
-            console.log("Button clicked for project:", project.id);
-            onSelect(project.id);
-          }} 
+          onClick={handleSelect}
           className="w-full bg-gradient-to-r from-builder-blue-600 to-builder-blue-700 hover:from-builder-blue-700 hover:to-builder-blue-800 border-none transition-all duration-500 shadow-md group-hover:shadow-lg py-6"
         >
           Open Project

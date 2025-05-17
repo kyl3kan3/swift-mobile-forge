@@ -24,17 +24,16 @@ export default function Dashboard() {
   };
 
   const handleSelectProject = (id: string) => {
-    console.log("Navigating to project:", id);
+    console.log("Opening project:", id);
+    
     // Show toast to provide feedback that the action is happening
     toast({
       title: "Opening project",
       description: "Redirecting to project builder...",
     });
     
-    // Use a slight delay to ensure the toast is shown before navigation
-    setTimeout(() => {
-      navigate(`/builder/${id}`);
-    }, 100);
+    // Navigate immediately to avoid potential timing issues
+    navigate(`/builder/${id}`);
   };
 
   return (

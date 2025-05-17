@@ -1,3 +1,4 @@
+
 import { Progress } from "@/components/ui/progress";
 import { useEffect, useState } from "react";
 
@@ -23,7 +24,7 @@ export default function LoadingIndicator({
       const timer = setTimeout(() => {
         setIsVisible(false);
         console.log("Loading indicator hidden");
-      }, 500);
+      }, 800);
       
       return () => clearTimeout(timer);
     }

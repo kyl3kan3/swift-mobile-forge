@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from "react";
 import { Separator } from "@/components/ui/separator";
-import { toast } from "sonner";
 
 // Import components
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
@@ -16,7 +15,7 @@ import { useNavigationState } from "@/hooks/useNavigationState";
 import { useProjectActions } from "@/hooks/useProjectActions";
 
 export default function Dashboard() {
-  // First, define all state hooks
+  // Define all state hooks first
   const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
   
   // Initialize navigation state
@@ -24,10 +23,7 @@ export default function Dashboard() {
     isNavigating,
     loadingProjectId,
     progressValue,
-    navigateToBuilder,
-    setIsNavigating,
-    setLoadingProjectId,
-    navigationStarted
+    navigateToBuilder
   } = useNavigationState();
   
   // Initialize project data and actions
@@ -39,17 +35,17 @@ export default function Dashboard() {
     handleDeleteProject
   } = useProjectActions({
     navigateToBuilder,
-    setIsNavigating,
-    setLoadingProjectId,
-    navigationStarted
+    setIsNavigating: () => {}, // We'll let useNavigationState handle this
+    setLoadingProjectId: () => {}, // We'll let useNavigationState handle this
+    navigationStarted: isNavigating
   });
   
-  // Effect hooks after state declarations
+  // Log information for debugging
   useEffect(() => {
     console.log("Dashboard mounted, projects count:", projects.length);
   }, [projects]);
 
-  // Determine loading message based on state
+  // Determine loading message based on progress
   const getLoadingMessage = () => {
     if (progressValue < 50) return "Preparing project...";
     if (progressValue < 90) return "Opening project...";
@@ -81,7 +77,7 @@ export default function Dashboard() {
         onCreateProject={handleCreateProject}
       />
       
-      {/* Loading overlay with improved message handling */}
+      {/* Loading overlay */}
       <LoadingIndicator 
         isNavigating={isNavigating} 
         progressValue={progressValue} 

@@ -3,19 +3,9 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
 export function useNavigationState() {
-  // State for tracking navigation
   const [isNavigating, setIsNavigating] = useState(false);
   const [loadingProjectId, setLoadingProjectId] = useState<string | null>(null);
   const [progressValue, setProgressValue] = useState(0);
-  const [navigationStarted, setNavigationStarted] = useState(false);
-
-  // Reset navigation state on component mount
-  useEffect(() => {
-    console.log("Navigation state initialized");
-    return () => {
-      console.log("Navigation state cleanup");
-    };
-  }, []);
   
   // Handle progress animation
   useEffect(() => {
@@ -39,7 +29,7 @@ export function useNavigationState() {
     };
   }, [isNavigating]);
   
-  // Auto-clear loading state after timeout
+  // Navigation timeout safety
   useEffect(() => {
     let timeout: NodeJS.Timeout;
     
@@ -48,7 +38,6 @@ export function useNavigationState() {
         console.log("Navigation timeout safety triggered");
         setIsNavigating(false);
         setLoadingProjectId(null);
-        setNavigationStarted(false);
         toast.error("Navigation timed out. Please try again.");
       }, 15000); // 15-second safety timeout
     }
@@ -58,9 +47,9 @@ export function useNavigationState() {
     };
   }, [isNavigating]);
 
-  // Navigation function
+  // Navigation function with direct location change
   const navigateToBuilder = (projectId: string) => {
-    if (navigationStarted) {
+    if (isNavigating) {
       console.log("Navigation already in progress, ignoring request");
       return;
     }
@@ -70,14 +59,13 @@ export function useNavigationState() {
     // Set state
     setIsNavigating(true);
     setLoadingProjectId(projectId);
-    setNavigationStarted(true);
     setProgressValue(0);
     
-    // Add small delay to allow UI to update
+    // Use a short timeout to allow state updates to render
     setTimeout(() => {
       setProgressValue(100);
       
-      // Direct navigation for reliability
+      // Direct navigation via window.location for maximum reliability
       setTimeout(() => {
         const timestamp = Date.now();
         const url = `/builder/${projectId}?t=${timestamp}`;
@@ -94,7 +82,6 @@ export function useNavigationState() {
     progressValue,
     setIsNavigating,
     setLoadingProjectId,
-    navigateToBuilder,
-    navigationStarted
+    navigateToBuilder
   };
 }

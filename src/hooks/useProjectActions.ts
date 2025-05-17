@@ -2,7 +2,6 @@
 import { useCallback } from "react";
 import { useProjects } from "@/hooks/useProjects";
 import { AppTemplate } from "@/types/appBuilder";
-import { useToast } from "@/components/ui/use-toast";
 import { toast } from "sonner";
 
 interface UseProjectActionsProps {
@@ -14,12 +13,9 @@ interface UseProjectActionsProps {
 
 export function useProjectActions({
   navigateToBuilder,
-  setIsNavigating,
-  setLoadingProjectId,
   navigationStarted
 }: UseProjectActionsProps) {
   const { projects, isLoading, createProject, deleteProject } = useProjects();
-  const { toast: shadowToast } = useToast();
   
   // Handle project creation
   const handleCreateProject = useCallback(async (name: string, description: string, template: AppTemplate) => {
@@ -29,10 +25,6 @@ export function useProjectActions({
     }
     
     try {
-      // Set loading state first
-      setIsNavigating(true);
-      setLoadingProjectId("creating");
-      
       // Create the project
       const newProjectId = await createProject(name, description, template);
       
@@ -45,17 +37,13 @@ export function useProjectActions({
         navigateToBuilder(newProjectId);
       } else {
         // Handle creation failure
-        setIsNavigating(false);
-        setLoadingProjectId(null);
         toast.error("Failed to create project. Please try again.");
       }
     } catch (error) {
       console.error("Error in handleCreateProject:", error);
-      setIsNavigating(false);
-      setLoadingProjectId(null);
       toast.error("An error occurred while creating your project.");
     }
-  }, [createProject, navigateToBuilder, navigationStarted, setIsNavigating, setLoadingProjectId]);
+  }, [createProject, navigateToBuilder, navigationStarted]);
 
   // Handle project selection
   const handleSelectProject = useCallback((id: string) => {

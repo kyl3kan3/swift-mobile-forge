@@ -1,7 +1,7 @@
 
 import { AppComponent, AppScreen } from "@/types/appBuilder";
 import { useEffect, useState } from "react";
-import { ChevronLeft, Menu, ShoppingCart } from "lucide-react";
+import { ChevronLeft, Menu, ShoppingCart, Battery } from "lucide-react";
 
 interface PhonePreviewProps {
   activeScreen: AppScreen | null;
@@ -32,7 +32,7 @@ export default function PhonePreview({
     switch (component.type) {
       case 'navbar':
         return (
-          <div key={component.id} className="px-4 py-3 flex items-center justify-between border-b border-gray-200 bg-white">
+          <div key={component.id} className="px-4 py-3 flex items-center justify-between border-b border-gray-200 bg-white backdrop-blur-md bg-opacity-90 sticky top-0 z-10">
             <div className="flex items-center">
               {component.props.showBackButton && <ChevronLeft className="h-5 w-5 mr-2 text-gray-700" />}
               <h1 className="font-semibold text-gray-800">{component.props.title}</h1>
@@ -49,13 +49,13 @@ export default function PhonePreview({
         return (
           <div key={component.id} className="px-4 py-2">
             {component.props.variant === 'h1' && (
-              <h1 className="text-xl font-bold text-gray-800">{component.props.content}</h1>
+              <h1 className="text-xl font-bold text-gray-800 mb-2">{component.props.content}</h1>
             )}
             {component.props.variant === 'h2' && (
-              <h2 className="text-lg font-semibold text-gray-800">{component.props.content}</h2>
+              <h2 className="text-lg font-semibold text-gray-800 mb-1.5">{component.props.content}</h2>
             )}
             {component.props.variant === 'p' && (
-              <p className="text-base text-gray-700">{component.props.content}</p>
+              <p className="text-base text-gray-700 leading-relaxed">{component.props.content}</p>
             )}
           </div>
         );
@@ -65,7 +65,7 @@ export default function PhonePreview({
             <img 
               src={component.props.src} 
               alt={component.props.alt} 
-              className="w-full rounded-md shadow-sm"
+              className="w-full rounded-xl shadow-md hover:shadow-lg transition-shadow"
               style={{ height: `${component.props.height}px` }}
             />
           </div>
@@ -74,11 +74,11 @@ export default function PhonePreview({
         return (
           <div key={component.id} className="px-4 py-2">
             <button className={`
-              px-4 py-2 rounded-md w-full transition-all duration-200
+              px-4 py-2 rounded-lg w-full transition-all duration-200 font-medium
               ${component.props.variant === 'primary' ? 'gradient-bg text-white shadow-sm hover:shadow-md' : ''}
               ${component.props.variant === 'secondary' ? 'border border-indigo-500 text-indigo-500 hover:bg-indigo-50' : ''}
-              ${component.props.size === 'small' ? 'text-sm py-1.5' : ''}
-              ${component.props.size === 'large' ? 'text-lg py-2.5' : ''}
+              ${component.props.size === 'small' ? 'text-sm py-1.5 rounded-md' : ''}
+              ${component.props.size === 'large' ? 'text-lg py-2.5 rounded-xl' : ''}
             `}>
               {component.props.label}
             </button>
@@ -87,11 +87,11 @@ export default function PhonePreview({
       case 'list':
         return (
           <div key={component.id} className="px-4 py-2">
-            <ul className="divide-y divide-gray-200 bg-white rounded-md shadow-sm">
+            <ul className="divide-y divide-gray-200 bg-white rounded-xl shadow-sm overflow-hidden">
               {component.props.items.map((item: any) => (
-                <li key={item.id} className="py-3 px-3 flex justify-between items-center hover:bg-gray-50">
-                  <span className="text-gray-800">{item.title}</span>
-                  {item.price && <span className="font-medium text-gray-900">{item.price}</span>}
+                <li key={item.id} className="py-3 px-4 flex justify-between items-center hover:bg-gray-50 transition-colors">
+                  <span className="text-gray-800 font-medium">{item.title}</span>
+                  {item.price && <span className="font-semibold text-gray-900 bg-gray-100 px-2 py-0.5 rounded-md">{item.price}</span>}
                 </li>
               ))}
             </ul>
@@ -99,7 +99,7 @@ export default function PhonePreview({
         );
       default:
         return (
-          <div key={component.id} className="px-4 py-2 border border-dashed rounded-md m-4 text-center text-gray-500 text-sm">
+          <div key={component.id} className="px-4 py-2 border border-dashed rounded-xl m-4 text-center text-gray-500 text-sm">
             {component.type} component
           </div>
         );
@@ -109,9 +109,9 @@ export default function PhonePreview({
   return (
     <div className="flex justify-center items-start h-full pt-8">
       <div className={`
-        w-[320px] h-[650px] bg-white rounded-[36px] relative overflow-hidden 
+        w-[320px] h-[650px] bg-white rounded-[36px] relative overflow-hidden phone-preview
         ${platform === 'ios' ? 'ios-device' : 'android-device'}
-        shadow-[0_24px_40px_-12px_rgba(0,0,0,0.25)] transition-all duration-500 hover:-translate-y-2
+        shadow-[0_24px_40px_-12px_rgba(0,0,0,0.25)] transition-all duration-500
       `}>
         {/* Device Frame */}
         <div className="absolute inset-0 pointer-events-none z-10">
@@ -130,19 +130,19 @@ export default function PhonePreview({
         {/* Status Bar */}
         <div className={`
           h-10 relative z-0 flex justify-between items-center px-6 
-          ${platform === 'ios' ? 'pt-6 bg-black text-white' : 'bg-gray-900 text-white'}
+          ${platform === 'ios' ? 'pt-6 bg-gradient-to-b from-gray-900 to-gray-800 text-white' : 'bg-gray-900 text-white'}
         `}>
           <span className="text-xs font-medium">{currentTime}</span>
           <div className="flex items-center gap-1.5">
             <div className="h-2 w-2 rounded-full bg-white opacity-80"></div>
             <div className="h-2 w-2 rounded-full bg-white opacity-90"></div>
-            <div className="h-2 w-2 rounded-full bg-white"></div>
+            <Battery className="h-3.5 w-3.5 text-white" />
           </div>
         </div>
         
         {/* Screen Content Area */}
         <div 
-          className="flex-1 overflow-auto bg-gray-100 h-[calc(100%-10rem)]"
+          className="flex-1 overflow-auto bg-gray-50 h-[calc(100%-10rem)]"
           onDragOver={onDragOver}
           onDrop={onDrop}
         >
@@ -153,10 +153,10 @@ export default function PhonePreview({
             </>
           ) : (
             <div className="h-full flex flex-col items-center justify-center text-gray-500 p-8 text-center">
-              <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center mb-4">
+              <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4 animate-pulse-soft">
                 <Menu className="h-6 w-6 text-gray-400" />
               </div>
-              <p className="text-sm">No screen selected</p>
+              <p className="text-sm font-medium">No screen selected</p>
               <p className="text-xs text-gray-400 mt-2">Select or create a screen from the sidebar</p>
             </div>
           )}
@@ -165,7 +165,7 @@ export default function PhonePreview({
         {/* Home Bar / Navigation */}
         <div className={`
           absolute bottom-0 left-0 right-0
-          ${platform === 'ios' ? 'h-10 bg-black' : 'h-14 bg-gray-900'}
+          ${platform === 'ios' ? 'h-10 bg-gradient-to-t from-gray-900 to-gray-800' : 'h-14 bg-gray-900'}
           flex justify-center items-center
         `}>
           {platform === 'ios' ? (

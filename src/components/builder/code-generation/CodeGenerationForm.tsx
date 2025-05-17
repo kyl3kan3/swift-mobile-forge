@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
-import { Loader2, Code } from "lucide-react";
+import { Loader2, Code, Sparkles } from "lucide-react";
 
 interface CodeGenerationFormProps {
   isGenerating: boolean;
@@ -20,9 +20,19 @@ export default function CodeGenerationForm({
 
   return (
     <div className="space-y-4 my-4">
+      <div className="p-4 bg-accent/50 rounded-lg border border-accent">
+        <div className="flex items-center gap-2 mb-2">
+          <Sparkles className="h-4 w-4 text-purple-600" />
+          <h4 className="font-medium">AI Code Generator</h4>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Add specific instructions to customize the generated code. Mention frameworks, libraries, or styling preferences.
+        </p>
+      </div>
+      
       <Textarea 
         placeholder="Add specific instructions or requirements for the code generation..."
-        className="min-h-[100px]"
+        className="min-h-[120px] text-sm shadow-sm"
         value={generationPrompt}
         onChange={(e) => setGenerationPrompt(e.target.value)}
         disabled={isGenerating}
@@ -31,11 +41,12 @@ export default function CodeGenerationForm({
       {isGenerating && (
         <div className="space-y-2">
           <div className="flex justify-between items-center text-sm">
-            <span>Generating code</span>
-            <span>{Math.round(generationProgress)}%</span>
+            <span className="font-medium text-primary">Generating code</span>
+            <span className="font-semibold">{Math.round(generationProgress)}%</span>
           </div>
-          <Progress value={generationProgress} className="h-2" />
-          <p className="text-xs text-muted-foreground animate-pulse">
+          <Progress value={generationProgress} className="h-2 bg-secondary" />
+          <p className="text-xs text-muted-foreground animate-pulse flex items-center gap-1.5">
+            <Loader2 className="h-3 w-3 animate-spin" />
             AI is analyzing your app design and generating code...
           </p>
         </div>
@@ -44,7 +55,8 @@ export default function CodeGenerationForm({
       <Button 
         onClick={() => onGenerate(generationPrompt)} 
         disabled={isGenerating}
-        className="w-full"
+        className="w-full btn-hover-lift"
+        variant={isGenerating ? "outline" : "default"}
       >
         {isGenerating ? (
           <>

@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AppProject } from "@/types/appBuilder";
-import { Code, FileCode } from "lucide-react";
+import { FileCode, Code } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { generateCodeForAllPlatforms } from "@/utils/codeGenerationUtils";
 import CodePreviewPanel from "./code-generation/CodePreviewPanel";
@@ -119,13 +119,13 @@ export default function EnhancedCodeGeneration({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[800px] max-h-[80vh] flex flex-col">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Code className="h-5 w-5 text-blue-500" />
+      <DialogContent className="sm:max-w-[800px] max-h-[80vh] flex flex-col bg-gradient-subtle shadow-glow">
+        <DialogHeader className="pb-2">
+          <DialogTitle className="flex items-center gap-2 text-gradient">
+            <Code className="h-5 w-5 text-primary" />
             AI Code Generator
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-muted-foreground">
             Generate production-ready native code for your app design using artificial intelligence.
           </DialogDescription>
         </DialogHeader>
@@ -138,28 +138,28 @@ export default function EnhancedCodeGeneration({
           />
         ) : (
           <div className="flex-1 flex flex-col overflow-hidden">
+            <div className="bg-accent/50 p-3 rounded-lg border border-accent mb-4">
+              <p className="text-sm">{codeExplanation}</p>
+            </div>
+            
             <Tabs 
               value={activeTab} 
               onValueChange={setActiveTab}
               className="flex-1 flex flex-col"
             >
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="react">React Native</TabsTrigger>
-                <TabsTrigger value="swift">Swift (iOS)</TabsTrigger>
-                <TabsTrigger value="kotlin">Kotlin (Android)</TabsTrigger>
-                <TabsTrigger value="flutter">Flutter</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-4 mb-4 bg-background/70 backdrop-blur-sm shadow-sm">
+                <TabsTrigger value="react" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">React Native</TabsTrigger>
+                <TabsTrigger value="swift" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Swift (iOS)</TabsTrigger>
+                <TabsTrigger value="kotlin" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Kotlin (Android)</TabsTrigger>
+                <TabsTrigger value="flutter" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Flutter</TabsTrigger>
               </TabsList>
               
               {Object.entries(generatedCode).map(([platform, code]) => (
                 <TabsContent 
                   key={platform} 
                   value={platform}
-                  className="flex-1 flex flex-col overflow-hidden"
+                  className="flex-1 flex flex-col overflow-hidden m-0 border-none"
                 >
-                  <div className="bg-gray-50 p-3 rounded-md border mb-4">
-                    <p className="text-sm">{codeExplanation}</p>
-                  </div>
-                  
                   <CodePreviewPanel
                     code={code}
                     platform={platform}
@@ -173,13 +173,13 @@ export default function EnhancedCodeGeneration({
         )}
 
         <DialogFooter className="mt-4">
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={onClose} className="shadow-sm">
             Close
           </Button>
           {generatedCode[activeTab] && (
             <Button 
               onClick={downloadAllCode}
-              className="gap-2"
+              className="gap-2 btn-hover-lift bg-primary"
             >
               <FileCode className="h-4 w-4" />
               Export All Code

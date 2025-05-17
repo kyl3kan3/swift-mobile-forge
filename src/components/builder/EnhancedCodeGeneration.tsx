@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -304,7 +303,7 @@ const styles = StyleSheet.create({
 });
     `;
 
-    // Generate Swift code (enhanced)
+    // Generate Swift code (enhanced) - Fixed string interpolation issues
     const swiftCode = `
 import SwiftUI
 
@@ -369,10 +368,11 @@ struct ${screen.name.replace(/\s+/g, '')}View: View {
                         .background(${comp.props.variant === 'primary' ? 'Color.blue' : 'Color.white'})
                         .foregroundColor(${comp.props.variant === 'primary' ? 'Color.white' : 'Color.blue'})
                         .cornerRadius(8)
-                        ${comp.props.variant === 'secondary' ? '.overlay(
+                        ${comp.props.variant === 'secondary' ? `
+                        .overlay(
                             RoundedRectangle(cornerRadius: 8)
                                 .stroke(Color.blue, lineWidth: 1)
-                        )' : ''}
+                        )` : ''}
                 }
                 .padding(.horizontal)`;
                         case 'list':
@@ -534,7 +534,8 @@ fun ${screen.name.replace(/\s+/g, '')}Screen(navController: NavController) {
                             text = "${comp.props.content || 'Heading'}",
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Bold
-                        )` : comp.props.variant === 'h2' ? 
+                        )` : 
+                                comp.props.variant === 'h2' ? 
                                         `Text(
                             text = "${comp.props.content || 'Subheading'}",
                             fontSize = 20.sp,
@@ -726,23 +727,9 @@ class ${screen.name.replace(/\s+/g, '')}Screen extends StatelessWidget {
                     ),`).join('\n                    ')}
                   ],
                 ),
-              ),
-              SizedBox(height: 16),`;
-                  case 'image':
-                    return `Container(
-                width: double.infinity,
-                height: ${comp.props.height || 200}.0,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  image: DecorationImage(
-                    image: NetworkImage('${comp.props.src || 'https://via.placeholder.com/150'}'),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-              SizedBox(height: 16),`;
-                  default:
-                    return `Container(
+              }`;
+                    default:
+                      return `Container(
                 width: double.infinity,
                 padding: EdgeInsets.all(16),
                 decoration: BoxDecoration(

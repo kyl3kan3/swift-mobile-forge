@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import ProjectsSection from "@/components/dashboard/ProjectsSection";
@@ -36,10 +35,14 @@ export default function Dashboard() {
     navigationInProgress
   });
   
-  // This component should not interfere with navigation state when unmounting
+  // No cleanup needed - intentionally keep navigation state when unmounting
   useEffect(() => {
+    // Log when dashboard mounts
+    console.log("Dashboard mounted");
+    
     return () => {
-      // Intentionally empty to prevent cleanup from interfering with navigation
+      // Log when dashboard unmounts
+      console.log("Dashboard unmounting - navigation should continue");
     };
   }, []);
 

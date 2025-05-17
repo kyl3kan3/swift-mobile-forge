@@ -11,43 +11,41 @@ export function useNavigationState() {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Reset navigation state on mount and clean up on unmount
+  // Reset navigation state only when first arriving at dashboard
   useEffect(() => {
-    // Clear any potential stuck states
-    const resetNavigationState = () => {
+    const isInitialDashboardLoad = 
+      location.pathname === '/dashboard' && 
+      !navigationInProgress.current && 
+      !isNavigating;
+      
+    if (isInitialDashboardLoad) {
       setIsNavigating(false);
       setLoadingProjectId(null);
       setProgressValue(0);
       navigationInProgress.current = false;
-    };
-
-    // Reset on mount only if we're actually on the dashboard
-    // This prevents resetting during navigation
-    if (location.pathname === '/dashboard') {
-      resetNavigationState();
+      console.log("Initial dashboard load, resetting navigation state");
     }
-
-    return () => {
-      // Do not reset when leaving dashboard - we need to maintain state during navigation
-    };
-  }, [location.pathname]);
+  }, [location.pathname, isNavigating]);
   
-  // Only detect if we're going back to dashboard from another route
+  // Handle failed navigation cases
   useEffect(() => {
-    // We don't want to reset navigation state when we're actually navigating to the builder
-    // Only reset if we detect we're back at dashboard WITHOUT successfully navigating
+    // Only run if we attempted navigation but ended up back at dashboard
     if (location.pathname === '/dashboard' && navigationInProgress.current) {
-      console.log('Navigation failed or user returned to dashboard, resetting navigation state');
+      console.log('Possible navigation failure detected');
       
-      // Add a small delay to ensure we're not resetting during an active navigation
-      setTimeout(() => {
-        if (location.pathname === '/dashboard') {
+      // Delay to ensure we're not resetting during an active navigation
+      const timeout = setTimeout(() => {
+        if (location.pathname === '/dashboard' && navigationInProgress.current) {
+          console.log('Navigation failed - still on dashboard after timeout');
           setIsNavigating(false);
           setLoadingProjectId(null);
           setProgressValue(0);
           navigationInProgress.current = false;
+          toast.error("Could not open project. Please try again.");
         }
-      }, 500);
+      }, 1000);
+      
+      return () => clearTimeout(timeout);
     }
   }, [location.pathname]);
   
@@ -59,14 +57,14 @@ export function useNavigationState() {
       // Reset progress
       setProgressValue(0);
       
-      // Animate progress from 0 to 90% over 1.5 seconds
+      // Animate progress from 0 to 95% more quickly (1 second)
       interval = setInterval(() => {
         setProgressValue(prev => {
-          const newValue = prev + 5;
-          return newValue < 90 ? newValue : 90;
+          const newValue = prev + 10;
+          return newValue < 95 ? newValue : 95;
         });
       }, 100);
-    } else {
+    } else if (!isNavigating) {
       setProgressValue(0);
     }
     
@@ -75,21 +73,21 @@ export function useNavigationState() {
     };
   }, [isNavigating, loadingProjectId]);
   
-  // Clear loading state if we're still on Dashboard after a delay
+  // Clear loading state if navigation takes too long
   useEffect(() => {
     let timeout: NodeJS.Timeout;
     
     if (isNavigating) {
-      // If we're still on the Dashboard after 3 seconds, clear the loading state
+      // If we're still on the Dashboard after 5 seconds, clear the loading state
       timeout = setTimeout(() => {
-        if (location.pathname.includes('dashboard')) {
-          console.log("Still on dashboard after timeout, clearing navigation state");
+        if (location.pathname.includes('dashboard') && isNavigating) {
+          console.log("Navigation timeout - still on dashboard after 5 seconds");
           setIsNavigating(false);
           setLoadingProjectId(null);
           navigationInProgress.current = false;
           toast.error("Navigation failed. Please try again.");
         }
-      }, 3000);
+      }, 5000);
     }
     
     return () => {
@@ -97,27 +95,36 @@ export function useNavigationState() {
     };
   }, [isNavigating, location.pathname]);
 
-  // Stable navigation function with decisive push navigation
+  // Decisive navigation function with multiple safeguards
   const navigateToBuilder = (projectId: string) => {
     if (navigationInProgress.current) {
       console.log("Navigation already in progress, ignoring additional request");
       return;
     }
     
+    console.log(`Starting navigation to project: ${projectId}`);
+    
+    // Set state variables
     setIsNavigating(true);
     setLoadingProjectId(projectId);
     navigationInProgress.current = true;
     
-    console.log(`Preparing to navigate to project: ${projectId}`);
-    
-    // Complete the progress immediately when actually navigating
+    // Complete the progress immediately
     setProgressValue(100);
     
-    // Use a forced navigation approach to ensure the route change happens
+    // Force hard navigation without any history manipulation
     setTimeout(() => {
-      console.log(`Navigating to: /builder/${projectId}`);
-      // Use replace here to force a clean navigation
-      navigate(`/builder/${projectId}`, { replace: true });
+      console.log(`Executing navigation to: /builder/${projectId}`);
+      
+      // Hard reload approach - most reliable way to ensure navigation works
+      window.location.href = `/builder/${projectId}`;
+      
+      // Backup approach in case the above doesn't trigger immediately
+      setTimeout(() => {
+        if (navigationInProgress.current) {
+          navigate(`/builder/${projectId}`, { replace: true });
+        }
+      }, 100);
     }, 200);
   };
 

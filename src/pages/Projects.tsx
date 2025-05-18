@@ -1,7 +1,6 @@
 
 import { useState } from "react";
 import { useProjects } from "@/hooks/useProjects";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -9,19 +8,26 @@ import { PlusCircle, Loader2 } from "lucide-react";
 import NewProjectDialog from "@/components/builder/NewProjectDialog";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { toast } from "sonner";
+import { useNavigationState } from "@/hooks/useNavigationState";
 
 export default function Projects() {
   const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
-  const navigate = useNavigate();
   const { projects, isLoading, createProject } = useProjects();
+  
+  // Use the same navigation state management that works in Dashboard
+  const {
+    isNavigating,
+    loadingProjectId,
+    progressValue,
+    navigateToBuilder
+  } = useNavigationState();
 
   const handleCreateProject = async (name: string, description: string, template: any) => {
     try {
       const newProjectId = await createProject(name, description, template);
       if (newProjectId) {
         toast.success(`Project "${name}" created successfully`);
-        // Use direct navigation for maximum compatibility
-        window.location.href = `/builder/${newProjectId}`;
+        navigateToBuilder(newProjectId);
       }
     } catch (error) {
       console.error("Error creating project:", error);
@@ -31,8 +37,14 @@ export default function Projects() {
 
   const handleSelectProject = (id: string) => {
     console.log("Project selected:", id);
-    // Use direct navigation for maximum compatibility
-    window.location.href = `/builder/${id}`;
+    navigateToBuilder(id);
+  };
+
+  // Add loading message based on progress
+  const getLoadingMessage = () => {
+    if (progressValue < 30) return "Preparing project...";
+    if (progressValue < 70) return "Loading project...";
+    return "Navigating to builder...";
   };
 
   return (
@@ -75,7 +87,19 @@ export default function Projects() {
                 <CardFooter className="bg-accent/20 px-6 py-3">
                   <div className="flex justify-between items-center w-full">
                     <span className="text-sm capitalize">{project.template}</span>
-                    <Button variant="ghost" size="sm">Open</Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      disabled={loadingProjectId === project.id}
+                      className="card-button"
+                    >
+                      {loadingProjectId === project.id ? (
+                        <div className="flex items-center gap-1.5">
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                          <span className="text-xs">Opening</span>
+                        </div>
+                      ) : "Open"}
+                    </Button>
                   </div>
                 </CardFooter>
               </Card>
@@ -99,6 +123,8 @@ export default function Projects() {
         onClose={() => setShowNewProjectDialog(false)}
         onCreateProject={handleCreateProject}
       />
+      
+      {/* Loading indicator from LoadingIndicator component is already provided by DashboardLayout */}
     </DashboardLayout>
   );
 }

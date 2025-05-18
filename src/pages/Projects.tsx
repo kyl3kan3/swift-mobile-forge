@@ -9,38 +9,34 @@ import NewProjectDialog from "@/components/builder/NewProjectDialog";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { toast } from "sonner";
 import { useNavigationState } from "@/hooks/useNavigationState";
+import LoadingIndicator from "@/components/dashboard/LoadingIndicator";
+import { useProjectActions } from "@/hooks/useProjectActions";
 
 export default function Projects() {
   const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
-  const { projects, isLoading, createProject } = useProjects();
   
-  // Use the same navigation state management that works in Dashboard
+  // Use the navigation state hook that works in Dashboard
   const {
     isNavigating,
     loadingProjectId,
     progressValue,
     navigateToBuilder
   } = useNavigationState();
+  
+  // Use the project actions hook that works in Dashboard
+  const {
+    projects,
+    isLoading,
+    handleCreateProject,
+    handleSelectProject
+  } = useProjectActions({
+    navigateToBuilder,
+    setIsNavigating: () => {}, // Navigation state is handled internally in useNavigationState
+    setLoadingProjectId: () => {}, // Navigation state is handled internally in useNavigationState
+    navigationStarted: isNavigating
+  });
 
-  const handleCreateProject = async (name: string, description: string, template: any) => {
-    try {
-      const newProjectId = await createProject(name, description, template);
-      if (newProjectId) {
-        toast.success(`Project "${name}" created successfully`);
-        navigateToBuilder(newProjectId);
-      }
-    } catch (error) {
-      console.error("Error creating project:", error);
-      toast.error("Failed to create project");
-    }
-  };
-
-  const handleSelectProject = (id: string) => {
-    console.log("Project selected:", id);
-    navigateToBuilder(id);
-  };
-
-  // Add loading message based on progress
+  // Determine loading message based on progress
   const getLoadingMessage = () => {
     if (progressValue < 30) return "Preparing project...";
     if (progressValue < 70) return "Loading project...";
@@ -124,7 +120,12 @@ export default function Projects() {
         onCreateProject={handleCreateProject}
       />
       
-      {/* Loading indicator from LoadingIndicator component is already provided by DashboardLayout */}
+      {/* Add explicit LoadingIndicator to match Dashboard implementation */}
+      <LoadingIndicator 
+        isNavigating={isNavigating} 
+        progressValue={progressValue} 
+        message={getLoadingMessage()}
+      />
     </DashboardLayout>
   );
 }

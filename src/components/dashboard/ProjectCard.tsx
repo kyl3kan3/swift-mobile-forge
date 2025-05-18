@@ -1,3 +1,4 @@
+
 import { AppProject } from "@/types/appBuilder";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -31,14 +32,13 @@ export default function ProjectCard({ project, onSelect, onDelete, isLoading = f
     });
   };
 
-  // Simple click handler without unnecessary event prevention
+  // Always prevent default behavior to avoid page reloads
   const handleCardClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     // Don't handle clicks when loading
-    if (isLoading) {
-      e.preventDefault();
-      e.stopPropagation();
-      return;
-    }
+    if (isLoading) return;
     
     // Don't handle card clicks from dropdown or button
     if (e.target instanceof Element) {

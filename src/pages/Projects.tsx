@@ -10,12 +10,13 @@ import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { toast } from "sonner";
 import { useNavigationState } from "@/hooks/useNavigationState";
 import LoadingIndicator from "@/components/dashboard/LoadingIndicator";
+import ProjectCard from "@/components/dashboard/ProjectCard";
 
 export default function Projects() {
   const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
   
   // Direct access to projects via useProjects
-  const { projects, isLoading, createProject } = useProjects();
+  const { projects, isLoading, createProject, deleteProject } = useProjects();
   
   // Use the navigation state hook for reliable navigation
   const {
@@ -58,6 +59,22 @@ export default function Projects() {
     navigateToBuilder(id);
   };
 
+  // Handle project deletion
+  const handleDeleteProject = async (id: string) => {
+    if (isNavigating) {
+      toast.error("Navigation in progress. Please wait.");
+      return;
+    }
+    
+    try {
+      await deleteProject(id);
+      toast.success("Project deleted successfully");
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      toast.error("Failed to delete project");
+    }
+  };
+
   // Determine loading message based on progress
   const getLoadingMessage = () => {
     if (progressValue < 30) return "Preparing project...";
@@ -93,34 +110,13 @@ export default function Projects() {
             </div>
           ) : projects.length > 0 ? (
             projects.map(project => (
-              <Card 
+              <ProjectCard 
                 key={project.id}
-                className="cursor-pointer hover:shadow-md transition-all"
-                onClick={() => handleSelectProject(project.id)}
-              >
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-bold">{project.name}</h3>
-                  <p className="text-sm text-muted-foreground mt-2">{project.description}</p>
-                </CardContent>
-                <CardFooter className="bg-accent/20 px-6 py-3">
-                  <div className="flex justify-between items-center w-full">
-                    <span className="text-sm capitalize">{project.template}</span>
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      disabled={loadingProjectId === project.id}
-                      className="card-button"
-                    >
-                      {loadingProjectId === project.id ? (
-                        <div className="flex items-center gap-1.5">
-                          <Loader2 className="h-3 w-3 animate-spin" />
-                          <span className="text-xs">Opening</span>
-                        </div>
-                      ) : "Open"}
-                    </Button>
-                  </div>
-                </CardFooter>
-              </Card>
+                project={project}
+                onSelect={handleSelectProject}
+                onDelete={handleDeleteProject}
+                isLoading={loadingProjectId === project.id}
+              />
             ))
           ) : (
             <div className="col-span-full text-center py-12">

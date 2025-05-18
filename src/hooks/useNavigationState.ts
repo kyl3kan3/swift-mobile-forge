@@ -1,11 +1,13 @@
 
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 export function useNavigationState() {
   const [isNavigating, setIsNavigating] = useState(false);
   const [loadingProjectId, setLoadingProjectId] = useState<string | null>(null);
   const [progressValue, setProgressValue] = useState(0);
+  const navigate = useNavigate();
   
   // Clear navigation state when component unmounts or when navigation completes
   useEffect(() => {
@@ -61,7 +63,7 @@ export function useNavigationState() {
     };
   }, [isNavigating]);
 
-  // Navigation function with direct location change
+  // Navigation function using React Router instead of direct location change
   const navigateToBuilder = (projectId: string) => {
     if (isNavigating) {
       console.log("Navigation already in progress, ignoring request");
@@ -78,14 +80,14 @@ export function useNavigationState() {
     setTimeout(() => {
       setProgressValue(100);
       
-      // Direct navigation via window.location for maximum reliability
+      // Use React Router navigation instead of window.location
       setTimeout(() => {
         // Add a timestamp to bust cache
         const timestamp = Date.now();
         const url = `/builder/${projectId}?t=${timestamp}`;
         
         console.log(`Navigating to: ${url}`);
-        window.location.href = url;
+        navigate(url);
       }, 800);
     }, 300);
     

@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { useProjects } from "@/hooks/useProjects";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { PlusCircle, Loader2 } from "lucide-react";
 import NewProjectDialog from "@/components/builder/NewProjectDialog";
@@ -48,7 +47,7 @@ export default function Projects() {
     }
   };
 
-  // Handle project selection with direct navigation
+  // Handle project selection with React Router navigation
   const handleSelectProject = (id: string) => {
     if (isNavigating) {
       toast.error("Navigation already in progress. Please wait.");

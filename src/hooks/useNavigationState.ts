@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
@@ -63,8 +63,8 @@ export function useNavigationState() {
     };
   }, [isNavigating]);
 
-  // Navigation function using React Router instead of direct location change
-  const navigateToBuilder = (projectId: string) => {
+  // Navigation function using React Router
+  const navigateToBuilder = useCallback((projectId: string) => {
     if (isNavigating) {
       console.log("Navigation already in progress, ignoring request");
       return false;
@@ -80,7 +80,7 @@ export function useNavigationState() {
     setTimeout(() => {
       setProgressValue(100);
       
-      // Use React Router navigation instead of window.location
+      // Use React Router navigation with a short delay
       setTimeout(() => {
         // Add a timestamp to bust cache
         const timestamp = Date.now();
@@ -88,11 +88,17 @@ export function useNavigationState() {
         
         console.log(`Navigating to: ${url}`);
         navigate(url);
+        
+        // Reset navigation state after successful navigation
+        setTimeout(() => {
+          setIsNavigating(false);
+          setLoadingProjectId(null);
+        }, 500);
       }, 800);
     }, 300);
     
     return true;
-  };
+  }, [isNavigating, navigate]);
 
   return {
     isNavigating,

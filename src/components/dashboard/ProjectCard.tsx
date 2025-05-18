@@ -53,6 +53,7 @@ export default function ProjectCard({ project, onSelect, onDelete, isLoading = f
 
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    e.preventDefault();
     onDelete(project.id);
   };
 
@@ -95,14 +96,20 @@ export default function ProjectCard({ project, onSelect, onDelete, isLoading = f
                 variant="ghost" 
                 size="icon" 
                 className="h-8 w-8 dropdown-trigger rounded-full"
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
                 disabled={isLoading}
               >
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="shadow-xl border-border/50 z-50">
-              <DropdownMenuItem onClick={handleDeleteClick} className="text-destructive cursor-pointer">
+              <DropdownMenuItem 
+                onClick={handleDeleteClick} 
+                className="text-destructive cursor-pointer"
+              >
                 <Trash2 className="mr-2 h-4 w-4" />
                 Delete Project
               </DropdownMenuItem>
@@ -142,6 +149,7 @@ export default function ProjectCard({ project, onSelect, onDelete, isLoading = f
             variant="ghost"
             size="sm"
             onClick={(e) => {
+              e.preventDefault();
               e.stopPropagation();
               !isLoading && onSelect(project.id);
             }}

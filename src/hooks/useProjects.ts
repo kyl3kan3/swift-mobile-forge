@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { AppProject, AppTemplate } from "@/types/appBuilder";
 import { useToast } from "@/components/ui/use-toast";
-import { mockProjects } from "@/data/mockData";
 import { v4 as uuidv4 } from 'uuid';
 import { 
   fetchProjectsFromSupabase,
@@ -26,15 +25,15 @@ export function useProjects() {
       const { data, error } = await fetchProjectsFromSupabase();
       
       if (error || !data) {
-        // Fall back to mock data if there's an error
-        setProjects(mockProjects);
+        // No fallback to mock data, just set empty array
+        setProjects([]);
       } else {
-        // If no projects from Supabase, use mock data
-        setProjects(data.length > 0 ? data : mockProjects);
+        // Use only data from Supabase, no fallback to mock data
+        setProjects(data);
       }
     } catch (error) {
       console.error("Error in fetchProjects:", error);
-      setProjects(mockProjects);
+      setProjects([]);
     } finally {
       setIsLoading(false);
     }
@@ -45,7 +44,7 @@ export function useProjects() {
       const { data: newProject, error } = await createProjectInSupabase(name, description, template);
       
       if (error) {
-        // Fall back to local creation
+        // Create project locally without mock data fallback
         const localProject: AppProject = {
           id: uuidv4(),
           name,

@@ -10,31 +10,53 @@ import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { toast } from "sonner";
 import { useNavigationState } from "@/hooks/useNavigationState";
 import LoadingIndicator from "@/components/dashboard/LoadingIndicator";
-import { useProjectActions } from "@/hooks/useProjectActions";
 
 export default function Projects() {
   const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
   
-  // Use the navigation state hook that works in Dashboard
+  // Direct access to projects via useProjects
+  const { projects, isLoading, createProject } = useProjects();
+  
+  // Use the navigation state hook for reliable navigation
   const {
     isNavigating,
     loadingProjectId,
     progressValue,
     navigateToBuilder
   } = useNavigationState();
-  
-  // Use the project actions hook that works in Dashboard
-  const {
-    projects,
-    isLoading,
-    handleCreateProject,
-    handleSelectProject
-  } = useProjectActions({
-    navigateToBuilder,
-    setIsNavigating: () => {}, // Navigation state is handled internally in useNavigationState
-    setLoadingProjectId: () => {}, // Navigation state is handled internally in useNavigationState
-    navigationStarted: isNavigating
-  });
+
+  // Handle project creation
+  const handleCreateProject = async (name: string, description: string, template: any) => {
+    if (isNavigating) {
+      toast.error("Navigation in progress. Please wait.");
+      return;
+    }
+    
+    try {
+      const newProjectId = await createProject(name, description, template);
+      
+      if (newProjectId) {
+        toast.success(`Project "${name}" created successfully`);
+        navigateToBuilder(newProjectId);
+      } else {
+        toast.error("Failed to create project. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error in handleCreateProject:", error);
+      toast.error("An error occurred while creating your project.");
+    }
+  };
+
+  // Handle project selection with direct navigation
+  const handleSelectProject = (id: string) => {
+    if (isNavigating) {
+      toast.error("Navigation already in progress. Please wait.");
+      return;
+    }
+    
+    console.log("Project selected:", id);
+    navigateToBuilder(id);
+  };
 
   // Determine loading message based on progress
   const getLoadingMessage = () => {
@@ -120,7 +142,7 @@ export default function Projects() {
         onCreateProject={handleCreateProject}
       />
       
-      {/* Add explicit LoadingIndicator to match Dashboard implementation */}
+      {/* Add explicit LoadingIndicator for navigation */}
       <LoadingIndicator 
         isNavigating={isNavigating} 
         progressValue={progressValue} 

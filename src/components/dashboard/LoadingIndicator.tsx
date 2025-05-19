@@ -23,11 +23,11 @@ export default function LoadingIndicator({
       console.log("Loading indicator displayed");
     } 
     else if (!isNavigating && isVisible) {
-      // Add a delay before hiding to ensure smooth transition
+      // Add a longer delay before hiding to ensure navigation completes
       const timer = setTimeout(() => {
         setIsVisible(false);
         console.log("Loading indicator hidden");
-      }, 1500); // Longer delay to ensure navigation completes
+      }, 2000); // Even longer delay to ensure navigation completes
       
       return () => clearTimeout(timer);
     }

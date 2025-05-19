@@ -1,13 +1,14 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export function useNavigationState() {
   const [isNavigating, setIsNavigating] = useState(false);
   const [loadingProjectId, setLoadingProjectId] = useState<string | null>(null);
   const [progressValue, setProgressValue] = useState(0);
   const navigate = useNavigate();
+  const location = useLocation();
   
   // Clear navigation state when component unmounts or when navigation completes
   useEffect(() => {
@@ -84,22 +85,19 @@ export function useNavigationState() {
       
       console.log(`Navigating to: ${url}`);
       
-      // Use React Router navigation with state to ensure proper handling
-      navigate(url, { 
-        replace: true,
-        state: { projectId, timestamp }
-      });
+      // Use hard navigation instead of React Router to ensure full page reload
+      window.location.href = url;
       
-      // Reset navigation state after a delay
+      // Reset navigation state after a longer delay
       setTimeout(() => {
         setIsNavigating(false);
         setLoadingProjectId(null);
         setProgressValue(100);
-      }, 1000);
-    }, 300);
+      }, 2000);
+    }, 500);
     
     return true;
-  }, [isNavigating, navigate]);
+  }, [isNavigating]);
 
   return {
     isNavigating,

@@ -57,7 +57,7 @@ const App = () => (
               <Route path="/simple-projects" element={<SimpleProjects />} />
               <Route path="/templates" element={<RequireAuth><TemplateGallery /></RequireAuth>} />
               <Route path="/templates/:projectId" element={<RequireAuth><TemplateGallery /></RequireAuth>} />
-              <Route path="/builder/:projectId" element={<RequireAuth><AppBuilder /></RequireAuth>} />
+              <Route path="/builder/:projectId" element={<RequireAuth><AppBuilder key="builder" /></RequireAuth>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>

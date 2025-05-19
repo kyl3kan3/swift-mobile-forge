@@ -4,7 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
 import RequireAuth from "@/components/common/RequireAuth";
 
@@ -44,9 +44,6 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
-  // Force component remount when route changes
-  const getBuilderKey = () => `builder-${Date.now()}`;
-  
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -56,16 +53,32 @@ const App = () => {
             <Suspense fallback={<LoadingPage />}>
               <Routes>
                 <Route path="/" element={<Index />} />
-                <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
-                <Route path="/projects" element={<RequireAuth><Projects /></RequireAuth>} />
+                <Route path="/dashboard" element={
+                  <RequireAuth>
+                    <Dashboard />
+                  </RequireAuth>
+                } />
+                <Route path="/projects" element={
+                  <RequireAuth>
+                    <Projects />
+                  </RequireAuth>
+                } />
                 <Route path="/simple-projects" element={<SimpleProjects />} />
-                <Route path="/templates" element={<RequireAuth><TemplateGallery /></RequireAuth>} />
-                <Route path="/templates/:projectId" element={<RequireAuth><TemplateGallery /></RequireAuth>} />
+                <Route path="/templates" element={
+                  <RequireAuth>
+                    <TemplateGallery />
+                  </RequireAuth>
+                } />
+                <Route path="/templates/:projectId" element={
+                  <RequireAuth>
+                    <TemplateGallery />
+                  </RequireAuth>
+                } />
                 <Route 
                   path="/builder/:projectId" 
                   element={
                     <RequireAuth>
-                      <AppBuilder key={getBuilderKey()} />
+                      <AppBuilder />
                     </RequireAuth>
                   } 
                 />

@@ -3,10 +3,9 @@ import { ReactNode, useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 // This is a placeholder for actual authentication logic
-// You would replace this with your actual auth check
+// In a real app, this would check tokens, session state, etc.
 const isAuthenticated = () => {
-  // For now, we'll just simulate being authenticated
-  // In reality, this would check a token, session state, etc.
+  // For demonstration purposes, we're just returning true
   return true;
 };
 
@@ -20,24 +19,31 @@ const RequireAuth = ({ children }: RequireAuthProps) => {
   const [isChecking, setIsChecking] = useState(true);
   
   useEffect(() => {
-    // If not authenticated, redirect to login
-    if (!isAuthenticated()) {
-      console.log("User not authenticated, redirecting to login");
-      navigate("/", { replace: true });
-    } else {
-      console.log("User authenticated, rendering protected route", location.pathname);
-    }
-    setIsChecking(false);
-  }, [navigate, location.pathname]);
+    // Check authentication status once on mount
+    const checkAuth = () => {
+      if (!isAuthenticated()) {
+        console.log("User not authenticated, redirecting to login");
+        navigate("/", { replace: true, state: { from: location.pathname } });
+      } else {
+        console.log("User authenticated, rendering protected route", location.pathname);
+      }
+      setIsChecking(false);
+    };
+    
+    checkAuth();
+    // Don't include navigate in dependencies to prevent redirect loops
+  }, [location.pathname]); 
 
-  // Add loading state to prevent flash of redirect
+  // Show loading state while checking auth
   if (isChecking) {
-    return <div className="flex h-screen w-full items-center justify-center">
-      <div className="animate-spin rounded-full h-10 w-10 border-2 border-primary border-r-transparent"></div>
-    </div>;
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <div className="animate-spin rounded-full h-10 w-10 border-2 border-primary border-r-transparent"></div>
+      </div>
+    );
   }
 
-  // If authenticated, render children
+  // If we're not redirecting, render the protected content
   return <>{children}</>;
 };
 

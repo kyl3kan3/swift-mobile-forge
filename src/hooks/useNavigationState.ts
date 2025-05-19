@@ -1,13 +1,11 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
-import { useNavigate, useLocation } from "react-router-dom";
 
 export function useNavigationState() {
   const [isNavigating, setIsNavigating] = useState(false);
   const [loadingProjectId, setLoadingProjectId] = useState<string | null>(null);
   const [progressValue, setProgressValue] = useState(0);
-  const navigate = useNavigate();
-  const location = useLocation();
   
   // Clear navigation state when component unmounts or when navigation completes
   useEffect(() => {
@@ -63,7 +61,7 @@ export function useNavigationState() {
     };
   }, [isNavigating]);
 
-  // Navigation function using React Router properly
+  // Navigation function using direct URL change for reliable navigation
   const navigateToBuilder = useCallback((projectId: string) => {
     if (isNavigating) {
       console.log("Navigation already in progress, ignoring request");
@@ -76,30 +74,17 @@ export function useNavigationState() {
     setIsNavigating(true);
     setLoadingProjectId(projectId);
     
-    // Use React Router navigation for proper SPA behavior
-    // Force a small delay to allow React to update state before navigation
+    // Use direct URL change for more reliable navigation
     setTimeout(() => {
-      const timestamp = Date.now();
-      const path = `/builder/${projectId}`;
+      // Force a full page reload to ensure proper component mounting
+      window.location.href = `/builder/${projectId}`;
       
-      console.log(`Navigating to: ${path} with timestamp ${timestamp}`);
-      
-      // Use React Router navigation with state and replace to prevent back button issues
-      navigate(path, { 
-        replace: true,
-        state: { timestamp }
-      });
-      
-      // Keep navigation state active for a moment to ensure LoadingIndicator stays visible
-      setTimeout(() => {
-        setIsNavigating(false);
-        setLoadingProjectId(null);
-        setProgressValue(100);
-      }, 1000);
-    }, 300);
+      // Note: The cleanup will happen when component unmounts
+      // No need to reset state here as the page will reload
+    }, 500);
     
     return true;
-  }, [isNavigating, navigate]);
+  }, [isNavigating]);
 
   return {
     isNavigating,

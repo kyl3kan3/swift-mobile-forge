@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -77,27 +76,30 @@ export function useNavigationState() {
     setIsNavigating(true);
     setLoadingProjectId(projectId);
     
+    // Use React Router navigation for proper SPA behavior
     // Force a small delay to allow React to update state before navigation
     setTimeout(() => {
-      // Add a timestamp to bust cache
       const timestamp = Date.now();
-      const url = `/builder/${projectId}?t=${timestamp}`;
+      const path = `/builder/${projectId}`;
       
-      console.log(`Navigating to: ${url}`);
+      console.log(`Navigating to: ${path} with timestamp ${timestamp}`);
       
-      // Use hard navigation instead of React Router to ensure full page reload
-      window.location.href = url;
+      // Use React Router navigation with state and replace to prevent back button issues
+      navigate(path, { 
+        replace: true,
+        state: { timestamp }
+      });
       
-      // Reset navigation state after a longer delay
+      // Keep navigation state active for a moment to ensure LoadingIndicator stays visible
       setTimeout(() => {
         setIsNavigating(false);
         setLoadingProjectId(null);
         setProgressValue(100);
-      }, 2000);
-    }, 500);
+      }, 1000);
+    }, 300);
     
     return true;
-  }, [isNavigating]);
+  }, [isNavigating, navigate]);
 
   return {
     isNavigating,

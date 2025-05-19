@@ -43,28 +43,40 @@ const queryClient = new QueryClient({
   }
 });
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Sonner position="bottom-right" closeButton richColors />
-      <ErrorBoundary>
-        <BrowserRouter>
-          <Suspense fallback={<LoadingPage />}>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
-              <Route path="/projects" element={<RequireAuth><Projects /></RequireAuth>} />
-              <Route path="/simple-projects" element={<SimpleProjects />} />
-              <Route path="/templates" element={<RequireAuth><TemplateGallery /></RequireAuth>} />
-              <Route path="/templates/:projectId" element={<RequireAuth><TemplateGallery /></RequireAuth>} />
-              <Route path="/builder/:projectId" element={<RequireAuth><AppBuilder key="builder" /></RequireAuth>} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-        </BrowserRouter>
-      </ErrorBoundary>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  // Force component remount when route changes
+  const getBuilderKey = () => `builder-${Date.now()}`;
+  
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Sonner position="bottom-right" closeButton richColors />
+        <ErrorBoundary>
+          <BrowserRouter>
+            <Suspense fallback={<LoadingPage />}>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
+                <Route path="/projects" element={<RequireAuth><Projects /></RequireAuth>} />
+                <Route path="/simple-projects" element={<SimpleProjects />} />
+                <Route path="/templates" element={<RequireAuth><TemplateGallery /></RequireAuth>} />
+                <Route path="/templates/:projectId" element={<RequireAuth><TemplateGallery /></RequireAuth>} />
+                <Route 
+                  path="/builder/:projectId" 
+                  element={
+                    <RequireAuth>
+                      <AppBuilder key={getBuilderKey()} />
+                    </RequireAuth>
+                  } 
+                />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </BrowserRouter>
+        </ErrorBoundary>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

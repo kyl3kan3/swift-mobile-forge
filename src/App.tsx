@@ -37,8 +37,8 @@ const queryClient = new QueryClient({
     queries: {
       retry: 1,
       refetchOnWindowFocus: false,
-      staleTime: 10000, // Increase stale time to reduce unnecessary fetches
-      gcTime: 300000 // 5 minutes garbage collection time (previously cacheTime)
+      staleTime: 10000,
+      gcTime: 300000
     }
   }
 });
@@ -46,7 +46,6 @@ const queryClient = new QueryClient({
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      {/* Using just one toast provider to avoid duplication */}
       <Sonner position="bottom-right" closeButton richColors />
       <ErrorBoundary>
         <BrowserRouter>

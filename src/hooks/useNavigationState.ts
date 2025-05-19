@@ -63,7 +63,7 @@ export function useNavigationState() {
     };
   }, [isNavigating]);
 
-  // Navigation function using React Router
+  // Navigation function using React Router properly
   const navigateToBuilder = useCallback((projectId: string) => {
     if (isNavigating) {
       console.log("Navigation already in progress, ignoring request");
@@ -76,24 +76,22 @@ export function useNavigationState() {
     setIsNavigating(true);
     setLoadingProjectId(projectId);
     
-    // Use a short timeout to allow state updates to render before navigation
+    // Add a small timeout to allow the loading indicator to render
     setTimeout(() => {
-      setProgressValue(100);
+      // Add a timestamp to bust cache
+      const timestamp = Date.now();
+      const url = `/builder/${projectId}?t=${timestamp}`;
       
-      // Use React Router navigation with a short delay
+      console.log(`Navigating to: ${url}`);
+      
+      // Use proper React Router navigation without redirects
+      navigate(url, { replace: true });
+      
+      // Set a timeout to reset navigation state after navigation completes
       setTimeout(() => {
-        // Add a timestamp to bust cache
-        const timestamp = Date.now();
-        const url = `/builder/${projectId}?t=${timestamp}`;
-        
-        console.log(`Navigating to: ${url}`);
-        navigate(url);
-        
-        // Reset navigation state after successful navigation
-        setTimeout(() => {
-          setIsNavigating(false);
-          setLoadingProjectId(null);
-        }, 500);
+        setIsNavigating(false);
+        setLoadingProjectId(null);
+        setProgressValue(100);
       }, 800);
     }, 300);
     

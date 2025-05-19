@@ -18,15 +18,16 @@ export default function LoadingIndicator({
   // Show and hide the indicator based on navigation state
   useEffect(() => {
     if (isNavigating && !isVisible) {
+      // Show immediately when navigation starts
       setIsVisible(true);
       console.log("Loading indicator displayed");
     } 
     else if (!isNavigating && isVisible) {
-      // Add a small delay before hiding the indicator to avoid flashing
+      // Add a delay before hiding to ensure smooth transition
       const timer = setTimeout(() => {
         setIsVisible(false);
         console.log("Loading indicator hidden");
-      }, 1000);
+      }, 1500); // Longer delay to ensure navigation completes
       
       return () => clearTimeout(timer);
     }

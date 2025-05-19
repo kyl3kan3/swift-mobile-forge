@@ -76,7 +76,7 @@ export function useNavigationState() {
     setIsNavigating(true);
     setLoadingProjectId(projectId);
     
-    // Add a small timeout to allow the loading indicator to render
+    // Force a small delay to allow React to update state before navigation
     setTimeout(() => {
       // Add a timestamp to bust cache
       const timestamp = Date.now();
@@ -84,15 +84,18 @@ export function useNavigationState() {
       
       console.log(`Navigating to: ${url}`);
       
-      // Use proper React Router navigation without redirects
-      navigate(url, { replace: true });
+      // Use React Router navigation with state to ensure proper handling
+      navigate(url, { 
+        replace: true,
+        state: { projectId, timestamp }
+      });
       
-      // Set a timeout to reset navigation state after navigation completes
+      // Reset navigation state after a delay
       setTimeout(() => {
         setIsNavigating(false);
         setLoadingProjectId(null);
         setProgressValue(100);
-      }, 800);
+      }, 1000);
     }, 300);
     
     return true;

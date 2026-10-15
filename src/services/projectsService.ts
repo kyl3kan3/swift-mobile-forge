@@ -61,6 +61,8 @@ export async function fetchProjectsFromSupabase() {
 
 export async function createProjectInSupabase(name: string, description: string, template: AppTemplate) {
   try {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) throw new Error('Sign in before creating a project');
     const newProjectId = uuidv4();
     
     const screens = [
@@ -81,6 +83,7 @@ export async function createProjectInSupabase(name: string, description: string,
       .from('projects')
       .insert({
         id: newProjectId,
+        user_id: user.id,
         name: name,
         description: description,
         app_config: {

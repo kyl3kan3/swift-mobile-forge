@@ -1,6 +1,7 @@
 
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 
 const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
 
@@ -16,14 +17,47 @@ serve(async (req) => {
   }
 
   try {
+    if (req.method !== 'POST') {
+      return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers: corsHeaders });
+    }
+    const authorization = req.headers.get('Authorization') ?? '';
+    if (!authorization.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Sign in required' }), { status: 401, headers: corsHeaders });
+    }
+    const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!, {
+      global: { headers: { Authorization: authorization } },
+      auth: { persistSession: false },
+    });
+    const { data: { user }, error: authError } = await supabase.auth.getUser(authorization.slice(7));
+    if (authError || !user || user.is_anonymous) {
+      return new Response(JSON.stringify({ error: 'Sign in required' }), { status: 401, headers: corsHeaders });
+    }
     if (!OPENAI_API_KEY) {
       throw new Error("Missing OpenAI API key");
     }
 
-    const { prompt, project, platform } = await req.json();
+    const raw = await req.text();
+    if (new TextEncoder().encode(raw).byteLength > 65536) {
+      return new Response(JSON.stringify({ error: 'Request too large' }), { status: 413, headers: corsHeaders });
+    }
+    const { prompt = '', project, platform } = JSON.parse(raw);
 
-    if (!prompt || !project || !platform) {
+    if (typeof prompt !== 'string' || prompt.length > 4000 || !project || typeof project.id !== 'string' ||
+        !['react', 'swift', 'kotlin', 'flutter'].includes(platform) || !Array.isArray(project.screens) || project.screens.length > 30) {
       throw new Error("Missing required parameters");
+    }
+    const { data: ownedProject, error: projectError } = await supabase.from('projects')
+      .select('id').eq('id', project.id).eq('user_id', user.id).maybeSingle();
+    if (projectError || !ownedProject) {
+      return new Response(JSON.stringify({ error: 'Project not found' }), { status: 403, headers: corsHeaders });
+    }
+    // The database reserves quota atomically across every edge-function instance.
+    const { data: allowed, error: quotaError } = await supabase.rpc('consume_codegen_quota');
+    if (quotaError) {
+      return new Response(JSON.stringify({ error: 'Generation quota unavailable' }), { status: 503, headers: corsHeaders });
+    }
+    if (allowed !== true) {
+      return new Response(JSON.stringify({ error: 'Daily generation limit reached' }), { status: 429, headers: corsHeaders });
     }
 
     // Convert project data to a formatted string

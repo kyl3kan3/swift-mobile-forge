@@ -15,6 +15,7 @@ import { FileCode, Code } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import CodePreviewPanel from "./code-generation/CodePreviewPanel";
 import CodeGenerationForm from "./code-generation/CodeGenerationForm";
+import { supabase } from "@/integrations/supabase/client";
 
 interface EnhancedCodeGenerationProps {
   isOpen: boolean;
@@ -61,6 +62,7 @@ export default function EnhancedCodeGeneration({
       
       // Create project data for API request
       const projectData = {
+        id: project.id,
         name: project.name,
         description: project.description || "",
         screens: project.screens.map(screen => ({
@@ -73,24 +75,16 @@ export default function EnhancedCodeGeneration({
       };
       
       // Call the OpenAI code generation edge function
-      const response = await fetch('/api/generate-code', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const { data: result, error: generationError } = await supabase.functions.invoke('generate-code', {
+        body: {
           prompt,
           project: projectData,
           platform: activeTab
-        }),
+        },
       });
       
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to generate code');
-      }
-      
-      const result = await response.json();
+      if (generationError) throw generationError;
+      if (result?.error) throw new Error(result.error);
       
       clearInterval(interval);
       setGenerationProgress(100);
